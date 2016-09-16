@@ -13,33 +13,15 @@
 -behaviour(application).
 
 -define(APP, emqttd_mios_plugin).
--import(proplists, [get_value/3]).
 
 %% Application callbacks
 -export([start/2, stop/1]).
 
-get_public_key(Env)->
-%%  PublicKeyFile = "/home/nico/Downloads/Skype/pubkey.pem",
-%%  PublicKeyFile.
-  PublicKeyFile = get_value(certificate, Env, "default_pubkey.pem"),
-  io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
-  Verify= gen_conf:value(emqttd_mios_plugin, verify),
-  if
-    Verify==false ->
-      no_verify;
-    true->
-      PublicKeyFile = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
-      PublicKeyFile
-  end.
-
 start(_StartType, _StartArgs) ->
   gen_conf:init(?APP),
   {ok, Sup} = emqttd_mios_plugin_sup:start_link(),
-  Env = gen_conf:value(?APP, mios),
-  io:format("Env: ~p~n",[Env]),
-  PubKeyFile=get_public_key(Env),
   emqttd_mios_plugin:load([]),
-  ok = emqttd_access_control:register_mod(auth, emqttd_mios_plugin_auth, [PubKeyFile]),
+  ok = emqttd_access_control:register_mod(auth, emqttd_mios_plugin_auth, gen_conf:value(?APP, mios)),
   ok = emqttd_access_control:register_mod(acl, emqttd_mios_plugin_acl, []),
   {ok, Sup}.
 
