@@ -13,6 +13,7 @@
 -behaviour(application).
 
 -define(APP, emqttd_auth_ldap).
+-import(proplists, [get_value/3]).
 
 %% Application callbacks
 -export([start/2, stop/1]).
