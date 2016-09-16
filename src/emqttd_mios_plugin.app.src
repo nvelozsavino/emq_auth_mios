@@ -5,6 +5,7 @@
     {modules, []},
     {registered, []},
     {applications, [
+      jiffy,
       kernel,
       stdlib
     ]},
