@@ -36,7 +36,7 @@ start(_StartType, _StartArgs) ->
   gen_conf:init(?APP),
   {ok, Sup} = emqttd_mios_plugin_sup:start_link(),
   Env = gen_conf:value(?APP, mios),
-  io:format("Env: ~p~n",Env),
+  io:format("Env: ~p~n",[Env]),
   PubKeyFile=get_public_key(Env),
   emqttd_mios_plugin:load([]),
   ok = emqttd_access_control:register_mod(auth, emqttd_mios_plugin_auth, [PubKeyFile]),
