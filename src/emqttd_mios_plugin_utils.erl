@@ -203,17 +203,21 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
 
 
 register_device(PK_Account,PK_Device) ->
-  create_table(devices,bag),
-  io:format("Device ~p inserted~n",[PK_Device]),
+%%  create_table(devices,bag),
+  io:format("register_device: Device ~p inserted~n",[PK_Device]),
   ets:insert(devices,{PK_Account,PK_Device}),
-  create_table(clients,set),
-  ets:insert(clients,{to_string(PK_Device),device,{PK_Account,PK_Device}}).
+%%  create_table(clients,set),
+  ets:insert(clients,{to_string(PK_Device),device,{PK_Account,PK_Device}}),
+  io:format("register_device: Client ~p inserted~n",[PK_Device]).
+
+
 register_user(PK_Account,ClientId,WhiteList) ->
-  create_table(users,bag),
-  io:format("User ~p inserted~n",[ClientId]),
+%%  create_table(users,bag),
+  io:format("register_user: User ~p inserted~n",[ClientId]),
   ets:insert(users,{PK_Account,ClientId,WhiteList}),
-  create_table(clients,set),
-  ets:insert(clients,{ClientId,user,{PK_Account,ClientId}}).
+%%  create_table(clients,set),
+  ets:insert(clients,{ClientId,user,{PK_Account,ClientId}}),
+  io:format("register_user: Client ~p inserted~n",[ClientId]).
 
 ets_lookup(Table,Key) ->
   TableNotExist=(ets:info(Table)==undefined),
@@ -224,12 +228,14 @@ ets_lookup(Table,Key) ->
   end.
 
 update_clients(PK_Account) ->
+  io:format("update_clients: Updating clients on Account ~p~n",[PK_Account]),
   Devices = ets_lookup(devices,PK_Account),
 %%  io:format("update_clients: Devices: ~p~n",[Devices]),
   Users = ets_lookup(users,PK_Account),
 %%  io:format("update_clients: Users: ~p~n",[Users]),
   update_users_topics(Users,Devices),
-  update_device_topics(Devices,Users).
+  update_device_topics(Devices,Users),
+  io:format("update_clients: Done Updating clients on Account ~p~n",[PK_Account]).
 
 list_contains(Element,[H|L])->
   Exist = (Element == H),
@@ -312,7 +318,7 @@ get_device_topics(PK_Device,[],Topics)->
 update_users_topics([H|L],DeviceList)->
   {_,ClientId,WhiteList}=H,
   NewTopics=get_user_topics(ClientId,DeviceList,WhiteList),
-  create_table(topics,set),
+%%  create_table(topics,set),
   ets:insert(topics,{ClientId,NewTopics}),
   io:format("update_users_topics: Topics for ~p are: ~p~n",[ClientId,NewTopics]),
   update_users_topics(L,DeviceList);
@@ -321,7 +327,7 @@ update_users_topics([],_)-> none.
 update_device_topics([H|L],UserList)->
   {_,PK_Device}=H,
   NewTopics=get_device_topics(PK_Device,UserList),
-  create_table(topics,set),
+%%  create_table(topics,set),
   ets:insert(topics,{to_string(PK_Device),NewTopics}),
   io:format("update_device_topics: Topics for ~p are: ~p~n",[PK_Device,NewTopics]),
   update_device_topics(L,UserList);
