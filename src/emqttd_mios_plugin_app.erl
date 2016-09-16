@@ -9,10 +9,9 @@
 
 %% @doc emqttd mios plugin application.
 -module(emqttd_mios_plugin_app).
-
+-include("emqttd_mios_plugin.hrl").
 -behaviour(application).
 
--define(APP, emqttd_mios_plugin).
 
 %% Application callbacks
 -export([start/2, stop/1]).

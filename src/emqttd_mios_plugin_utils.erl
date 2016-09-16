@@ -8,6 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(emqttd_mios_plugin_utils).
 -author("nico").
+-include("emqttd_mios_plugin.hrl").
 
 
 -define(EMPTY(Variable), (Variable=:= undefined orelse Variable=:= <<>>)).
@@ -203,20 +204,16 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
 
 
 register_device(PK_Account,PK_Device) ->
-%%  create_table(devices,bag),
   io:format("register_device: Device ~p inserted~n",[PK_Device]),
-  ets:insert(devices,{PK_Account,PK_Device}),
-%%  create_table(clients,set),
-  ets:insert(clients,{to_string(PK_Device),device,{PK_Account,PK_Device}}),
+  ets:insert(?DEVICES_DATABASE,{PK_Account,PK_Device}),
+  ets:insert(?CLIENTS_DATABASE,{to_string(PK_Device),device,{PK_Account,PK_Device}}),
   io:format("register_device: Client ~p inserted~n",[PK_Device]).
 
 
 register_user(PK_Account,ClientId,WhiteList) ->
-%%  create_table(users,bag),
   io:format("register_user: User ~p inserted~n",[ClientId]),
-  ets:insert(users,{PK_Account,ClientId,WhiteList}),
-%%  create_table(clients,set),
-  ets:insert(clients,{ClientId,user,{PK_Account,ClientId}}),
+  ets:insert(?USERS_DATABASE,{PK_Account,ClientId,WhiteList}),
+  ets:insert(?CLIENTS_DATABASE,{ClientId,user,{PK_Account,ClientId}}),
   io:format("register_user: Client ~p inserted~n",[ClientId]).
 
 ets_lookup(Table,Key) ->
@@ -229,9 +226,9 @@ ets_lookup(Table,Key) ->
 
 update_clients(PK_Account) ->
   io:format("update_clients: Updating clients on Account ~p~n",[PK_Account]),
-  Devices = ets_lookup(devices,PK_Account),
+  Devices = ets_lookup(?DEVICES_DATABASE,PK_Account),
 %%  io:format("update_clients: Devices: ~p~n",[Devices]),
-  Users = ets_lookup(users,PK_Account),
+  Users = ets_lookup(?USERS_DATABASE,PK_Account),
 %%  io:format("update_clients: Users: ~p~n",[Users]),
   update_users_topics(Users,Devices),
   update_device_topics(Devices,Users),
@@ -319,7 +316,7 @@ update_users_topics([H|L],DeviceList)->
   {_,ClientId,WhiteList}=H,
   NewTopics=get_user_topics(ClientId,DeviceList,WhiteList),
 %%  create_table(topics,set),
-  ets:insert(topics,{ClientId,NewTopics}),
+  ets:insert(?TOPICS_DATABASE,{ClientId,NewTopics}),
   io:format("update_users_topics: Topics for ~p are: ~p~n",[ClientId,NewTopics]),
   update_users_topics(L,DeviceList);
 update_users_topics([],_)-> none.
@@ -328,7 +325,7 @@ update_device_topics([H|L],UserList)->
   {_,PK_Device}=H,
   NewTopics=get_device_topics(PK_Device,UserList),
 %%  create_table(topics,set),
-  ets:insert(topics,{to_string(PK_Device),NewTopics}),
+  ets:insert(?TOPICS_DATABASE,{to_string(PK_Device),NewTopics}),
   io:format("update_device_topics: Topics for ~p are: ~p~n",[PK_Device,NewTopics]),
   update_device_topics(L,UserList);
 update_device_topics([],_)-> none.
@@ -350,18 +347,18 @@ delete_table(Name) ->
   end.
 
 delete_client(Client) ->
-  TableNotExist = (ets:info(clients)==undefined),
+  TableNotExist = (ets:info(?CLIENTS_DATABASE)==undefined),
   if
     TableNotExist->
       ok;
     true->
-      Info= ets_lookup(clients,Client),
+      Info= ets_lookup(?CLIENTS_DATABASE,Client),
       InfoLen=length(Info),
       if
         InfoLen==1 ->
           [Element]=Info,
           {_,Type,Data}=Element,
-          ets:match_delete(clients,Element),
+          ets:match_delete(?CLIENTS_DATABASE,Element),
           delete_topic(Client),
           case Type of
             user ->
@@ -383,24 +380,24 @@ delete_client(Client) ->
 
 
 delete_topic(Client)->
-  TableNotExist = (ets:info(topics)==undefined),
+  TableNotExist = (ets:info(?TOPICS_DATABASE)==undefined),
   if
     TableNotExist -> ok;
-    true -> ets:match_delete(topics,{Client,'_'})
+    true -> ets:match_delete(?TOPICS_DATABASE,{Client,'_'})
   end.
 
 delete_user(PK_Account,ClientId)->
-  TableNotExist = (ets:info(users)==undefined),
+  TableNotExist = (ets:info(?USERS_DATABASE)==undefined),
   if
     TableNotExist -> ok;
-    true -> ets:match_delete(users,{PK_Account,ClientId,'_'})
+    true -> ets:match_delete(?USERS_DATABASE,{PK_Account,ClientId,'_'})
   end.
 
 delete_device(PK_Account,PK_Device)->
-  TableNotExist = (ets:info(devices)==undefined),
+  TableNotExist = (ets:info(?DEVICES_DATABASE)==undefined),
   if
     TableNotExist -> ok;
-    true -> ets:match_delete(devices,{PK_Account,PK_Device})
+    true -> ets:match_delete(?DEVICES_DATABASE,{PK_Account,PK_Device})
   end.
 
 clean_topic(Topic)->
@@ -445,7 +442,7 @@ topic_match(_Topic,[])->false.
 
 check_acl(ClientId,PubSub,Topic)->
   io:format("check_acl ClientId: ~p, Pub: ~p, Topic: ~p~n",[ClientId,PubSub,Topic]),
-  Topics=ets_lookup(topics,ClientId),
+  Topics=ets_lookup(?TOPICS_DATABASE,ClientId),
   io:format("Topics: ~p~n",[Topics]),
   if
     length(Topics)==1 ->
@@ -464,16 +461,16 @@ check_acl(ClientId,PubSub,Topic)->
   end.
 
 create_tables()->
-  create_table(devices,bag),
-  create_table(users,bag),
-  create_table(clients,set),
-  create_table(topics,set).
+  create_table(?DEVICES_DATABASE,bag),
+  create_table(?USERS_DATABASE,bag),
+  create_table(?CLIENTS_DATABASE,set),
+  create_table(?TOPICS_DATABASE,set).
 
 delete_tables()->
-  delete_table(devices),
-  delete_table(users),
-  delete_table(clients),
-  delete_table(topics).
+  delete_table(?DEVICES_DATABASE),
+  delete_table(?USERS_DATABASE),
+  delete_table(?CLIENTS_DATABASE),
+  delete_table(?TOPICS_DATABASE).
 
 
 load_key(Filename) ->
@@ -495,7 +492,7 @@ keys(TableName, CurrentKey, Acc) ->
 
 
 update_all_clients() ->
-  KeysSet = sets:from_list(keys(users)++keys(devices)),
+  KeysSet = sets:from_list(keys(?USERS_DATABASE)++keys(?DEVICES_DATABASE)),
   update_all_clients(KeysSet).
 update_all_clients([H|T])->
   update_clients(H),
