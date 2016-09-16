@@ -18,7 +18,7 @@
 get_json(Json) ->
   try jiffy:decode(Json,[return_maps])
   catch
-    error:_ -> throw(invalid_json)
+    error:Error -> throw({invalid_json,Error})
   end.
 
 decode_base64(Base64) ->
@@ -142,7 +142,7 @@ check_auth(_,_,Password,_) when ?EMPTY(Password)->
 check_auth(_,_,_,ClientId) when ?EMPTY(ClientId)->
   {error,client_id_undefined};
 check_auth(PublicKey,UserName,Password,ClientId) ->
-  io:format("ClientID: ~p~n",[ClientId]),
+  io:format("ClientID: ~p~nUsername: ~p~nPassword: ~p~n",[ClientId,UserName,Password]),
   try
     JsonToken = get_json(Password),
     case maps:is_key(<<"Identity">>,JsonToken) and maps:is_key(<<"IdentitySignature">>,JsonToken) of
