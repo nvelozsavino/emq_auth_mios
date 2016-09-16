@@ -17,22 +17,22 @@
 -export([start/2, stop/1]).
 
 get_public_key()->
-  PublicKeyFile = "/home/nico/Downloads/Skype/pubkey.pem",
-  PublicKeyFile.
-%%  {ok, PublicKeyFile} = gen_conf:value(emqttd_mios_plugin, pubkey),
-%%  {ok, Verify}  = gen_conf:value(emqttd_mios_plugin, verify),
-%%  if
-%%    Verify==false ->
-%%      no_verify;
-%%    true->
-%%      PublicKeyFile = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
-%%      PublicKeyFile
-%%  end.
+%%  PublicKeyFile = "/home/nico/Downloads/Skype/pubkey.pem",
+%%  PublicKeyFile.
+  {ok, PublicKeyFile} = gen_conf:value(emqttd_mios_plugin, pubkey),
+  {ok, Verify}  = gen_conf:value(emqttd_mios_plugin, verify),
+  if
+    Verify==false ->
+      no_verify;
+    true->
+      PublicKeyFile = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
+      PublicKeyFile
+  end.
 
 start(_StartType, _StartArgs) ->
-%%  gen_conf:init(emqttd_mios_plugin),
+  gen_conf:init(emqttd_mios_plugin),
   {ok, Sup} = emqttd_mios_plugin_sup:start_link(),
-%%  emqttd_mios_plugin:load([]),
+  emqttd_mios_plugin:load([]),
   ok = emqttd_access_control:register_mod(auth, emqttd_mios_plugin_auth, [get_public_key()]),
   ok = emqttd_access_control:register_mod(acl, emqttd_mios_plugin_acl, []),
   {ok, Sup}.
