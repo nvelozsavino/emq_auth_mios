@@ -17,9 +17,7 @@
 
 get_json(Json) ->
   try
-    Decoded = jiffy:decode(Json,[return_maps]),
-      io:format("Deocoded: ~p~n",[Decoded]),
-      Decoded
+    jiffy:decode(Json,[return_maps])
   catch
     error:Error -> throw({invalid_json,Error})
   end.
@@ -160,7 +158,8 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
               case get_token_type(IdentityJson) of
                 {user,PK_Account,TokenClientId,TokenUsername,WhiteList} ->
                   Authorized = (UserName == TokenUsername) and (TokenClientId==ClientId),
-                  io:format("UserName: ~p  Username: ~p~n",[TokenUsername,UserName]),
+                  io:format("Required Username: ~p  Username: ~p~n",[TokenUsername,UserName]),
+                  io:format("Required ClientId: ~p  ClientId: ~p~n",[TokenClientId,ClientId]),
                   if
                     Authorized ->
                       register_user(PK_Account,ClientId,WhiteList),
@@ -173,7 +172,8 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
                 {device,PK_Account,PK_Device} ->
                   PK_DeviceStr=to_string(PK_Device),
                   Authorized = (UserName == PK_DeviceStr) and (PK_DeviceStr==ClientId),
-                  io:format("PK_Device: ~p  Username: ~p~n",[PK_DeviceStr,UserName]),
+                  io:format("Required Username: ~p  Username: ~p~n",[PK_DeviceStr,UserName]),
+                  io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,ClientId]),
                   if
                     Authorized ->
                       register_device(PK_Account,PK_Device),

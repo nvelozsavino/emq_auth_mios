@@ -21,9 +21,7 @@ start(_StartType, _StartArgs) ->
   gen_conf:init(?APP),
   {ok, Sup} = emqttd_mios_plugin_sup:start_link(),
   emqttd_mios_plugin:load([]),
-  Json="{\"test\":12,\"str\":\"string\"}",
-  Decoded = jiffy:decode(Json,[return_maps]),
-  io:format("JsonTest: ~p~n", [Decoded]),
+
   ok = emqttd_access_control:register_mod(auth, emqttd_mios_plugin_auth, gen_conf:value(?APP, mios)),
   ok = emqttd_access_control:register_mod(acl, emqttd_mios_plugin_acl, []),
   {ok, Sup}.
