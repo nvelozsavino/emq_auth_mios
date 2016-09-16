@@ -99,12 +99,12 @@ get_token_type(IdentityJson) ->
 
       if
         DeviceExist ->
-          io:fwrite("It's a device token~n"),
+          io:format("It's a device token~n"),
           PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
           PK_Device=maps:get(<<"PK_Device">>,IdentityJson),
           {device,PK_Account,PK_Device};
         UserExist ->
-          io:fwrite("It's a user token~n"),
+          io:format("It's a user token~n"),
           PK_User=maps:get(<<"PK_User">>,IdentityJson),
           PK_Server_Auth=maps:get(<<"PK_Server_Auth">>,IdentityJson),
           Seq=maps:get(<<"Seq">>,IdentityJson),
@@ -113,13 +113,13 @@ get_token_type(IdentityJson) ->
           "_" ++ to_string(PK_Server_Auth) ++
           "_" ++ to_string(Seq) ++
           "_" ++ to_string(Generated),
-          io:fwrite("ClientId ~p~n",[Client_Id]),
+          io:format("ClientId ~p~n",[Client_Id]),
           PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
           Username = binary_to_list(maps:get(<<"Username">>,IdentityJson)),
           PermissionsExist=maps:is_key(<<"Permissions">>,IdentityJson),
           if
             PermissionsExist ->
-              io:fwrite("Permissions exist~n"),
+              io:format("Permissions exist~n"),
               Permissions = maps:get(<<"Permissions">>,IdentityJson),
               {user, PK_Account,Client_Id,Username,get_white_list(Permissions)};
             true->
@@ -142,7 +142,7 @@ check_auth(_,_,Password,_) when ?EMPTY(Password)->
 check_auth(_,_,_,ClientId) when ?EMPTY(ClientId)->
   {error,client_id_undefined};
 check_auth(PublicKey,UserName,Password,ClientId) ->
-  io:fwrite("ClientID: ~p~n",[ClientId]),
+  io:format("ClientID: ~p~n",[ClientId]),
   try
     JsonToken = get_json(Password),
     case maps:is_key(<<"Identity">>,JsonToken) and maps:is_key(<<"IdentitySignature">>,JsonToken) of
@@ -157,12 +157,12 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
               case get_token_type(IdentityJson) of
                 {user,PK_Account,TokenClientId,TokenUsername,WhiteList} ->
                   Authorized = (UserName == TokenUsername) and (TokenClientId==ClientId),
-                  io:fwrite("UserName: ~p  Username: ~p~n",[TokenUsername,UserName]),
+                  io:format("UserName: ~p  Username: ~p~n",[TokenUsername,UserName]),
                   if
                     Authorized ->
                       register_user(PK_Account,ClientId,WhiteList),
                       update_clients(PK_Account),
-                      io:fwrite("Done with user ~p~n-----------------------~n",[ClientId]),
+                      io:format("Done with user ~p~n-----------------------~n",[ClientId]),
                       ok;
                     true->
                       {error,not_authorized}
@@ -170,44 +170,44 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
                 {device,PK_Account,PK_Device} ->
                   PK_DeviceStr=to_string(PK_Device),
                   Authorized = (UserName == PK_DeviceStr) and (PK_DeviceStr==ClientId),
-                  io:fwrite("PK_Device: ~p  Username: ~p~n",[PK_DeviceStr,UserName]),
+                  io:format("PK_Device: ~p  Username: ~p~n",[PK_DeviceStr,UserName]),
                   if
                     Authorized ->
                       register_device(PK_Account,PK_Device),
                       update_clients(PK_Account),
-                      io:fwrite("Done with device ~p~n-----------------------~n",[PK_Device]),
+                      io:format("Done with device ~p~n-----------------------~n",[PK_Device]),
                       ok;
                     true->
                       {error,not_authorized}
                   end;
                 _Else ->
-                  io:fwrite("Unrecognized TokenType ~p~n",[_Else]),
+                  io:format("Unrecognized TokenType ~p~n",[_Else]),
                   {error,unrecongized_token}
               end;
             true ->
-              io:fwrite("Signature Failed ~n"),
+              io:format("Signature Failed ~n"),
               {error,signature_failed}
           end;
       false ->
-        io:fwrite("Token unrecognized ~n"),
+        io:format("Token unrecognized ~n"),
         {error,token_unrecognized}
     end
   catch
     throw:Error ->
-      io:fwrite("Throw ~p~n",[Error]),
+      io:format("Throw ~p~n",[Error]),
       {error,Error}
   end.
 
 
 register_device(PK_Account,PK_Device) ->
   create_table(devices,bag),
-  io:fwrite("Device ~p inserted~n",[PK_Device]),
+  io:format("Device ~p inserted~n",[PK_Device]),
   ets:insert(devices,{PK_Account,PK_Device}),
   create_table(clients,set),
   ets:insert(clients,{to_string(PK_Device),device,{PK_Account,PK_Device}}).
 register_user(PK_Account,ClientId,WhiteList) ->
   create_table(users,bag),
-  io:fwrite("User ~p inserted~n",[ClientId]),
+  io:format("User ~p inserted~n",[ClientId]),
   ets:insert(users,{PK_Account,ClientId,WhiteList}),
   create_table(clients,set),
   ets:insert(clients,{ClientId,user,{PK_Account,ClientId}}).
@@ -222,9 +222,9 @@ ets_lookup(Table,Key) ->
 
 update_clients(PK_Account) ->
   Devices = ets_lookup(devices,PK_Account),
-%%  io:fwrite("update_clients: Devices: ~p~n",[Devices]),
+%%  io:format("update_clients: Devices: ~p~n",[Devices]),
   Users = ets_lookup(users,PK_Account),
-%%  io:fwrite("update_clients: Users: ~p~n",[Users]),
+%%  io:format("update_clients: Users: ~p~n",[Users]),
   update_users_topics(Users,Devices),
   update_device_topics(Devices,Users).
 
@@ -269,7 +269,7 @@ get_user_topics(ClientId,[],Topics,_)->
   Pub=[ClientId++"/connected"],
   Sub=["+/connected"],
   NewTopics=insert_topics(Sub,Pub,Topics),
-%%  io:fwrite("get_user_topics: ~p Ending with topics: ~p~n",[ClientId,NewTopics]),
+%%  io:format("get_user_topics: ~p Ending with topics: ~p~n",[ClientId,NewTopics]),
   NewTopics.
 
 
@@ -291,7 +291,7 @@ get_device_topics(PK_Device,[H|T],Topics)->
           to_string(PK_Device)++"/"++ClientId++"/source",
           to_string(PK_Device)++"/"++ClientId++"/alive"],
 %%          ClientId++"/connected"],
-%%      io:fwrite("get_device_topics: Topics: ~p~n",[Topics]),
+%%      io:format("get_device_topics: Topics: ~p~n",[Topics]),
       NewTopics=insert_topics(NewSubTopics,NewPubTopics,Topics),
       get_device_topics(PK_Device,T,NewTopics);
     true ->
@@ -301,7 +301,7 @@ get_device_topics(PK_Device,[],Topics)->
   Pub=[to_string(PK_Device)++"/connected"],
   Sub=["+/connected"],
   NewTopics= insert_topics(Sub,Pub,Topics),
-%%  io:fwrite("get_device_topics: ~p Ending with topics: ~p~n",[PK_Device,NewTopics]),
+%%  io:format("get_device_topics: ~p Ending with topics: ~p~n",[PK_Device,NewTopics]),
   NewTopics.
 
 
@@ -311,7 +311,7 @@ update_users_topics([H|L],DeviceList)->
   NewTopics=get_user_topics(ClientId,DeviceList,WhiteList),
   create_table(topics,set),
   ets:insert(topics,{ClientId,NewTopics}),
-  io:fwrite("update_users_topics: Topics for ~p are: ~p~n",[ClientId,NewTopics]),
+  io:format("update_users_topics: Topics for ~p are: ~p~n",[ClientId,NewTopics]),
   update_users_topics(L,DeviceList);
 update_users_topics([],_)-> none.
 
@@ -320,7 +320,7 @@ update_device_topics([H|L],UserList)->
   NewTopics=get_device_topics(PK_Device,UserList),
   create_table(topics,set),
   ets:insert(topics,{to_string(PK_Device),NewTopics}),
-  io:fwrite("update_device_topics: Topics for ~p are: ~p~n",[PK_Device,NewTopics]),
+  io:format("update_device_topics: Topics for ~p are: ~p~n",[PK_Device,NewTopics]),
   update_device_topics(L,UserList);
 update_device_topics([],_)-> none.
 
@@ -358,16 +358,16 @@ delete_client(Client) ->
             user ->
               {PK_Account,ClientId}=Data,
               delete_user(PK_Account,ClientId),
-              io:fwrite("Deleting user: ~p~n",[ClientId]),
+              io:format("Deleting user: ~p~n",[ClientId]),
               update_clients(PK_Account);
             device->
               {PK_Account,PK_Device}=Data,
               delete_device(PK_Account,PK_Device),
-              io:fwrite("Deleting device: ~p~n",[PK_Device]),
+              io:format("Deleting device: ~p~n",[PK_Device]),
               update_clients(PK_Account)
           end;
         true->
-          io:fwrite("Client: ~p does not exist~n",[Client]),
+          io:format("Client: ~p does not exist~n",[Client]),
           ok
       end
   end.
@@ -435,9 +435,9 @@ topic_match(_Topic,[])->false.
 
 
 check_acl(ClientId,PubSub,Topic)->
-  io:fwrite("check_acl ClientId: ~p, Pub: ~p, Topic: ~p~n",[ClientId,PubSub,Topic]),
+  io:format("check_acl ClientId: ~p, Pub: ~p, Topic: ~p~n",[ClientId,PubSub,Topic]),
   Topics=ets_lookup(topics,ClientId),
-  io:fwrite("Topics: ~p~n",[Topics]),
+  io:format("Topics: ~p~n",[Topics]),
   if
     length(Topics)==1 ->
       [{_ClientId,{Sub,Pub}}]=Topics,
@@ -447,7 +447,7 @@ check_acl(ClientId,PubSub,Topic)->
         subscribe->
           topic_match(Topic,Sub);
         _Else ->
-          io:fwrite("Unrecongnized event~n"),
+          io:format("Unrecongnized event~n"),
           false
       end;
     true->

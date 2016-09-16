@@ -38,7 +38,7 @@ get_public_key(Opts)->
 
 init(Opts) ->
   PublicKey=get_public_key(Opts),
-  io:fwrite("init mios~n"),
+  io:format("init mios~n"),
 
   {ok,#state{certificate = PublicKey}}.
 
