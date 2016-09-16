@@ -12,14 +12,15 @@
 
 -behaviour(application).
 
+-define(APP, emqttd_auth_ldap).
 
 %% Application callbacks
 -export([start/2, stop/1]).
 
-get_public_key()->
+get_public_key(Env)->
 %%  PublicKeyFile = "/home/nico/Downloads/Skype/pubkey.pem",
 %%  PublicKeyFile.
-  PublicKeyFile = gen_conf:value(emqttd_mios_plugin, pubkey),
+  PublicKeyFile = get_value(pubkey, Env, "default_pubkey.pem"),
   io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
   Verify= gen_conf:value(emqttd_mios_plugin, verify),
   if
@@ -31,10 +32,13 @@ get_public_key()->
   end.
 
 start(_StartType, _StartArgs) ->
-  gen_conf:init(emqttd_mios_plugin),
+  gen_conf:init(?APP),
   {ok, Sup} = emqttd_mios_plugin_sup:start_link(),
+  Env = gen_conf:value(?APP, mios),
+  io:format("Env: ~p~n",Env),
+  PubKeyFile=get_public_key(Env),
   emqttd_mios_plugin:load([]),
-  ok = emqttd_access_control:register_mod(auth, emqttd_mios_plugin_auth, [get_public_key()]),
+  ok = emqttd_access_control:register_mod(auth, emqttd_mios_plugin_auth, [PubKeyFile]),
   ok = emqttd_access_control:register_mod(acl, emqttd_mios_plugin_acl, []),
   {ok, Sup}.
 
