@@ -47,6 +47,6 @@ check(_Client,Username,Password) when Username==undefined orelse Password==undef
 check(#mqtt_client{client_id = ClientId, username = Username}, Password,#state{certificate = PublicKey}) ->
   io:format("MiOS Auth: clientId=~p, username=~p, password=~p~n",
     [ClientId, Username, Password]),
-  emqttd_mios_plugin_utils:check_auth(PublicKey,binary_to_list(Username),binary_to_list(Password),binary_to_list(ClientId)).
+  emqttd_mios_plugin_utils:check_auth(PublicKey,binary_to_list(Username),Password,binary_to_list(ClientId)).
 
 description() -> "MiOS Auth Module".

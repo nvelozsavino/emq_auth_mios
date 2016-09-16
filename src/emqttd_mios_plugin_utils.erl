@@ -16,7 +16,10 @@
 -export([check_auth/4, delete_client/1,check_acl/3,create_tables/0,delete_tables/0, load_key/1, update_all_clients/0]).
 
 get_json(Json) ->
-  try jiffy:decode(Json,[return_maps])
+  try
+    Decoded = jiffy:decode(Json,[return_maps]),
+      io:format("Deocoded: ~p~n",[Decoded]),
+      Decoded
   catch
     error:Error -> throw({invalid_json,Error})
   end.
