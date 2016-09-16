@@ -1,0 +1,13 @@
+{application, emqttd_mios_plugin,
+  [
+    {description, "emqttd Authentication/ACL for MiOS"},
+    {vsn, "2.0"},
+    {modules, []},
+    {registered, []},
+    {applications, [
+      kernel,
+      stdlib
+    ]},
+    {mod, { emqttd_mios_plugin_app, []}},
+    {env, []}
+  ]}.
