@@ -20,10 +20,10 @@
 
 -record(state, {certificate}).
 
-get_public_key(Env)->
+get_public_key(Opts)->
 %%  PublicKeyFile = "/home/nico/Downloads/Skype/pubkey.pem",
 %%  PublicKeyFile.
-  PublicKeyFile = get_value(certificate, Env, "default_pubkey.pem"),
+  PublicKeyFile = get_value(certificate, Opts, "default_pubkey.pem"),
   io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
   Verify= gen_conf:value(emqttd_mios_plugin, verify),
   if
