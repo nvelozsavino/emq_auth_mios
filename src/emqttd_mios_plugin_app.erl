@@ -19,8 +19,9 @@
 get_public_key()->
 %%  PublicKeyFile = "/home/nico/Downloads/Skype/pubkey.pem",
 %%  PublicKeyFile.
-  {ok, PublicKeyFile} = gen_conf:value(emqttd_mios_plugin, pubkey),
-  {ok, Verify}  = gen_conf:value(emqttd_mios_plugin, verify),
+  PublicKeyFile = gen_conf:value(emqttd_mios_plugin, pubkey),
+  io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
+  Verify= gen_conf:value(emqttd_mios_plugin, verify),
   if
     Verify==false ->
       no_verify;
