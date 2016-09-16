@@ -334,7 +334,7 @@ create_table(Name,Type) ->
   TableNotExist = (ets:info(Name)==undefined),
   if
     TableNotExist ->
-      ets:new(Name,[Type,named_table]);
+      ets:new(Name,[Type,named_table,public]);
     true->ok
   end.
 
