@@ -19,14 +19,14 @@
 
 
 %% Called when the plugin application start
-load(_Env) ->
+load(Env) ->
   emqttd_mios_plugin_utils:create_tables(),
-  emqttd:hook('client.disconnected', fun ?MODULE:on_client_disconnected/3, []).
+  emqttd:hook('client.disconnected', fun ?MODULE:on_client_disconnected/3, [Env]).
 
 
-on_client_disconnected(Reason, _Client = #mqtt_client{client_id = ClientId}, _Env) ->
+on_client_disconnected(Reason, #mqtt_client{client_id = ClientId}, _Env) ->
   io:format("client ~s disconnected, reason: ~w~n", [ClientId, Reason]),
-  emqttd_mios_plugin_utils:delete_client(ClientId),
+  emqttd_mios_plugin_utils:delete_client(binary_to_list(ClientId)),
   ok.
 
 

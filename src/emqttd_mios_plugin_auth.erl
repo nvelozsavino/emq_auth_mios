@@ -10,8 +10,8 @@
 -author("nico").
 
 
--behaviour(emqttd_auth_mod).
 
+-behaviour(emqttd_auth_mod).
 -include_lib("emqttd/include/emqttd.hrl").
 
 %% API
@@ -27,6 +27,6 @@ init(Opts) ->
 check(#mqtt_client{client_id = ClientId, username = Username}, Password,[PublicKey]) ->
   io:format("MiOS Auth: clientId=~p, username=~p, password=~p~n",
     [ClientId, Username, Password]),
-  emqttd_mios_plugin_utils:check_auth(PublicKey,Username,Password,ClientId).
+  emqttd_mios_plugin_utils:check_auth(PublicKey,binary_to_list(Username),binary_to_list(Password),binary_to_list(ClientId)).
 
 description() -> "MiOS Auth Module".

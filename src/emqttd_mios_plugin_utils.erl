@@ -442,10 +442,13 @@ check_acl(ClientId,PubSub,Topic)->
     length(Topics)==1 ->
       [{_ClientId,{Sub,Pub}}]=Topics,
       case PubSub of
-        pub->
+        publish->
           topic_match(Topic,Pub);
-        sub->
-          topic_match(Topic,Sub)
+        subscribe->
+          topic_match(Topic,Sub);
+        _Else ->
+          io:fwrite("Unrecongnized event~n"),
+          false
       end;
     true->
       false

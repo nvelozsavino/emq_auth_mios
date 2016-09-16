@@ -18,9 +18,9 @@
 init(Opts) ->
   {ok, Opts}.
 
-check_acl({Client, PubSub, Topic}, _Opts) ->
-  io:format("MiOS ACL: ~p ~p ~p~n", [Client, PubSub, Topic]),
-  Allow=emqttd_mios_plugin_utils:check_acl(Client,PubSub,Topic),
+check_acl({#mqtt_client{client_id = ClientId}, PubSub, Topic}, _Opts) ->
+  io:format("MiOS ACL: ~p ~p ~p~n", [ClientId, PubSub, Topic]),
+  Allow=emqttd_mios_plugin_utils:check_acl(binary_to_list(ClientId),PubSub,binary_to_list(Topic)),
   if
     Allow ->
       allow;
