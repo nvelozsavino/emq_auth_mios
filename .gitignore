@@ -1,4 +1,5 @@
 .eunit
+deps/
 deps
 *.so
 .iml
@@ -20,3 +21,4 @@ test/*.beam
 cover/
 eunit.coverdata
 emqttd_mios_plugin.d
+/deps/
