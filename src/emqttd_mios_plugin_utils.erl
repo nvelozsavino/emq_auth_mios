@@ -129,13 +129,14 @@ get_token_type(IdentityJson) ->
     true-> throw(invalid_token)
   end.
 
-match_device_client_id(PK_Device,ClientID)->
+clean_device_client_id(ClientID)->
   Parts=string:tokens(ClientID,"_"),
   Length= length(Parts),
   if
     Length==1 orelse Length==2 ->
-      PK_Device==lists:nth(1,Parts);
-    true -> false
+      lists:nth(1,Parts);
+    true ->
+      ClientID
   end.
 
 
@@ -176,9 +177,10 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
                   end;
                 {device,PK_Account,PK_Device} ->
                   PK_DeviceStr=to_string(PK_Device),
-                  Authorized = (UserName == PK_DeviceStr) and (match_device_client_id(PK_DeviceStr,ClientId)),
+                  CleanedClientId= clean_device_client_id(ClientId),
+                  Authorized = (UserName == PK_DeviceStr) and (PK_DeviceStr==CleanedClientId),
                   io:format("Required Username: ~p  Username: ~p~n",[PK_DeviceStr,UserName]),
-                  io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,ClientId]),
+                  io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,CleanedClientId]),
                   if
                     Authorized ->
                       register_device(PK_Account,PK_Device),
