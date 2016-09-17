@@ -301,7 +301,7 @@ get_device_topics(PK_Device,[H|T],Topics)->
           to_string(PK_Device)++"/"++ClientId++"/out",
           to_string(PK_Device)++"/"++ClientId++"/ud"],
       NewSubTopics = [
-          to_string(PK_Device)++"/"++ClientId++"/in",
+          to_string(PK_Device)++"/+/in",
           to_string(PK_Device)++"/"++ClientId++"/alive"],
 %%          ClientId++"/connected"],
 %%      io:format("get_device_topics: Topics: ~p~n",[Topics]),
