@@ -21,7 +21,7 @@
 -record(state, {certificate}).
 
 get_public_key(Opts)->
-  PublicKeyFile = "/home/nico/Downloads/Skype/pubkey.pem",
+  PublicKeyFile = "/opt/emqtt/etc/pubkey.pem",
   PublicKey = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
   PublicKey.
 %%  PublicKeyFile = get_value(certificate, Opts, "default_pubkey.pem"),
