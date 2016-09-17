@@ -131,8 +131,9 @@ get_token_type(IdentityJson) ->
 
 match_device_client_id(PK_Device,ClientID)->
   Parts=string:tokens(ClientID,"_"),
+  Length= length(Parts),
   if
-    Parts==1 orelse Parts==2 ->
+    Length==1 orelse Length==2 ->
       PK_Device==lists:nth(1,Parts);
     true -> false
   end.
