@@ -301,9 +301,7 @@ get_device_topics(PK_Device,[H|T],Topics)->
           to_string(PK_Device)++"/"++ClientId++"/out",
           to_string(PK_Device)++"/"++ClientId++"/ud"],
       NewSubTopics = [
-          to_string(PK_Device)++"/+/in",
           to_string(PK_Device)++"/"++ClientId++"/alive"],
-%%          ClientId++"/connected"],
 %%      io:format("get_device_topics: Topics: ~p~n",[Topics]),
       NewTopics=insert_topics(NewSubTopics,NewPubTopics,Topics),
       get_device_topics(PK_Device,T,NewTopics);
@@ -312,7 +310,9 @@ get_device_topics(PK_Device,[H|T],Topics)->
   end;
 get_device_topics(PK_Device,[],Topics)->
   Pub=[to_string(PK_Device)++"/connected",to_string(PK_Device)++"/source"],
-  Sub=["+/connected",to_string(PK_Device)++"/source"],
+  Sub=["+/connected",
+      to_string(PK_Device)++"/source",
+      to_string(PK_Device)++"/+/in"],
   NewTopics= insert_topics(Sub,Pub,Topics),
 %%  io:format("get_device_topics: ~p Ending with topics: ~p~n",[PK_Device,NewTopics]),
   NewTopics.
