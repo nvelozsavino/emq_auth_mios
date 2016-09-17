@@ -71,7 +71,7 @@ get_white_list([H|L]) ->
 get_white_list([])-> all.
 
 get_timestamp()->
-  {Mega, Secs, _} = now(),
+  {Mega, Secs, _} = erlang:timestamp(),
   Timestamp = Mega*1000000 + Secs,
   Timestamp.
 
@@ -131,10 +131,10 @@ get_token_type(IdentityJson) ->
 
 match_device_client_id(PK_Device,ClientID)->
   Parts=string:tokens(ClientID,"_"),
-  case length(Parts) of
-    1 or 2 ->
+  if
+    Parts==1 orelse Parts==2 ->
       PK_Device==lists:nth(1,Parts);
-    _Else -> false
+    true -> false
   end.
 
 
