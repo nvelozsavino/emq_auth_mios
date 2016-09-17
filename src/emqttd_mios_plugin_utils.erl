@@ -70,28 +70,20 @@ get_white_list([H|L]) ->
   end;
 get_white_list([])-> all.
 
-
-%%find_white_list([H|L]) ->
-%%  find_white_list(L).
-%%find_white_list(Perm) ->
-%%  PermExist = maps:is_key(<<"PK_Permission">>,Perm),
-%%  if
-%%    PermExist ->
-%%      PermNumber=maps:is_key(<<"PK_Permission">>,Perm),
-%%  end,
-%%  if
-%%    maps:get(<<"PK_Permission">>,Perm)==41 ->
-%%      maps:get(<<"Arguments">>,Perm);
-%%    true ->
-%%  end
-
+get_timestamp()->
+  {Mega, Secs, _} = now(),
+  Timestamp = Mega*1000000 + Secs,
+  Timestamp.
 
 get_token_type(IdentityJson) when ?EMPTY(IdentityJson) ->
   throw(identity_undefined);
 get_token_type(IdentityJson) ->
-  Account =maps:is_key(<<"PK_Account">>,IdentityJson),
+  Valid=maps:is_key(<<"PK_Account">>,IdentityJson) and maps:is_key(<<"Expires">>,IdentityJson),
   if
-    Account ->
+    Valid ->
+      ExpireTime = maps:get(<<"Expires">>,IdentityJson),
+      Now=get_timestamp(),
+      Expired = ExpireTime>Now,
       DeviceExist =maps:is_key(<<"PK_Device">>,IdentityJson),
       UserExist =maps:is_key(<<"PK_User">>,IdentityJson) and
         maps:is_key(<<"PK_Server_Auth">>,IdentityJson) and
@@ -100,6 +92,9 @@ get_token_type(IdentityJson) ->
         maps:is_key(<<"Username">>,IdentityJson),
 
       if
+        Expired->
+          io:format("Token expired ~p seconds ago~n",[ExpireTime-Now]),
+          expired;
         DeviceExist ->
           io:format("It's a device token~n"),
           PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
@@ -132,6 +127,14 @@ get_token_type(IdentityJson) ->
         true-> throw(invalid_token)
       end;
     true-> throw(invalid_token)
+  end.
+
+match_device_client_id(PK_Device,ClientID)->
+  Parts=string:tokens(ClientID,"_"),
+  case length(Parts) of
+    1 or 2 ->
+      PK_Device==lists:nth(1,Parts);
+    _Else -> false
   end.
 
 
@@ -172,7 +175,7 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
                   end;
                 {device,PK_Account,PK_Device} ->
                   PK_DeviceStr=to_string(PK_Device),
-                  Authorized = (UserName == PK_DeviceStr) and (PK_DeviceStr==ClientId),
+                  Authorized = (UserName == PK_DeviceStr) and (match_device_client_id(PK_DeviceStr,ClientId)),
                   io:format("Required Username: ~p  Username: ~p~n",[PK_DeviceStr,UserName]),
                   io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,ClientId]),
                   if
@@ -184,6 +187,9 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
                     true->
                       {error,not_authorized}
                   end;
+                expired ->
+                  io:format("Token expired~n"),
+                  {error,expired_token};
                 _Else ->
                   io:format("Unrecognized TokenType ~p~n",[_Else]),
                   {error,unrecongized_token}
@@ -415,6 +421,7 @@ topic_match_splited([H1|T1],[H2|T2])->
     H1==H2 orelse H2=="+" -> topic_match_splited(T1,T2);
     true->false
   end;
+topic_match_splited(_H1,[H2]) when H2=="#"->true;
 topic_match_splited([_H1|_T1],[])-> false;
 topic_match_splited([],[_H2|_T2])-> false;
 topic_match_splited([],[])-> true.
