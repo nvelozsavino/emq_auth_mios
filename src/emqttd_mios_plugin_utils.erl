@@ -214,7 +214,7 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
 
 register_device(PK_Account,PK_Device,ClientId) ->
   io:format("register_device: Device ~p inserted~n",[PK_Device]),
-  ets:insert(?DEVICES_DATABASE,{PK_Account,PK_Device}),
+  ets:insert(?DEVICES_DATABASE,{PK_Account,PK_Device,ClientId}),
   ets:insert(?CLIENTS_DATABASE,{ClientId,device,{PK_Account,PK_Device}}),
   io:format("register_device: Client ~p inserted~n",[PK_Device]).
 
@@ -331,10 +331,10 @@ update_users_topics([H|L],DeviceList)->
 update_users_topics([],_)-> none.
 
 update_device_topics([H|L],UserList)->
-  {_,PK_Device}=H,
+  {_,PK_Device,ClientId}=H,
   NewTopics=get_device_topics(PK_Device,UserList),
 %%  create_table(topics,set),
-  ets:insert(?TOPICS_DATABASE,{to_string(PK_Device),NewTopics}),
+  ets:insert(?TOPICS_DATABASE,{ClientId,NewTopics}),
   io:format("update_device_topics: Topics for ~p are: ~p~n",[PK_Device,NewTopics]),
   update_device_topics(L,UserList);
 update_device_topics([],_)-> none.
