@@ -133,7 +133,7 @@ clean_device_client_id(ClientID)->
   Parts=string:tokens(ClientID,"_"),
   Length= length(Parts),
   if
-    Length==1 orelse Length==2 ->
+    Length>=1->
       lists:nth(1,Parts);
     true ->
       ClientID
