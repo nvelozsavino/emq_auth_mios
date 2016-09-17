@@ -25,7 +25,7 @@ load(Env) ->
 
 
 on_client_disconnected(Reason, #mqtt_client{client_id = ClientId}, _Env) ->
-  io:format("client ~s disconnected, reason: ~w~n", [ClientId, Reason]),
+  io:format("on_client_disconnected: client ~s disconnected, reason: ~w~n", [ClientId, Reason]),
   emqttd_mios_plugin_utils:delete_client(binary_to_list(ClientId)),
   ok.
 

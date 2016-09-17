@@ -16,10 +16,11 @@
 -export([init/1, check_acl/2, reload_acl/1, description/0]).
 
 init(Opts) ->
+  io:format("init: Init ACL mios plugin~n"),
   {ok, Opts}.
 
 check_acl({#mqtt_client{client_id = ClientId}, PubSub, Topic}, _Opts) ->
-  io:format("MiOS ACL: ~p ~p ~p~n", [ClientId, PubSub, Topic]),
+%%  io:format("MiOS ACL: ~p ~p ~p~n", [ClientId, PubSub, Topic]),
   Allow=emqttd_mios_plugin_utils:check_acl(binary_to_list(ClientId),PubSub,binary_to_list(Topic)),
   if
     Allow ->
