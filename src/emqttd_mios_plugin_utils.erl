@@ -215,14 +215,14 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
 register_device(PK_Account,PK_Device,ClientId) ->
 %%  io:format("register_device: Device ~p inserted~n",[PK_Device]),
   ets:insert(?DEVICES_DATABASE,{PK_Account,PK_Device,ClientId}),
-  ets:insert(?CLIENTS_DATABASE,{ClientId,device,{PK_Account,PK_Device}}),
+  ets:insert(?CLIENTS_DATABASE,{ClientId,device,{PK_Account,PK_Device}}).
 %%  io:format("register_device: Client ~p inserted~n",[PK_Device]).
 
 
 register_user(PK_Account,ClientId,WhiteList) ->
 %%  io:format("register_user: User ~p inserted~n",[ClientId]),
   ets:insert(?USERS_DATABASE,{PK_Account,ClientId,WhiteList}),
-  ets:insert(?CLIENTS_DATABASE,{ClientId,user,{PK_Account,ClientId}}),
+  ets:insert(?CLIENTS_DATABASE,{ClientId,user,{PK_Account,ClientId}}).
 %%  io:format("register_user: Client ~p inserted~n",[ClientId]).
 
 ets_lookup(Table,Key) ->
