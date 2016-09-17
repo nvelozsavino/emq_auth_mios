@@ -183,7 +183,7 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
                   io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,CleanedClientId]),
                   if
                     Authorized ->
-                      register_device(PK_Account,PK_Device),
+                      register_device(PK_Account,PK_Device,ClientId),
                       update_clients(PK_Account),
                       io:format("Done with device ~p~n-----------------------~n",[PK_Device]),
                       ok;
@@ -212,10 +212,10 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
   end.
 
 
-register_device(PK_Account,PK_Device) ->
+register_device(PK_Account,PK_Device,ClientId) ->
   io:format("register_device: Device ~p inserted~n",[PK_Device]),
   ets:insert(?DEVICES_DATABASE,{PK_Account,PK_Device}),
-  ets:insert(?CLIENTS_DATABASE,{to_string(PK_Device),device,{PK_Account,PK_Device}}),
+  ets:insert(?CLIENTS_DATABASE,{ClientId,device,{PK_Account,PK_Device}}),
   io:format("register_device: Client ~p inserted~n",[PK_Device]).
 
 
