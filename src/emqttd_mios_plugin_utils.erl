@@ -83,7 +83,7 @@ get_token_type(IdentityJson) ->
     Valid ->
       ExpireTime = maps:get(<<"Expires">>,IdentityJson),
       Now=get_timestamp(),
-      Expired = ExpireTime>Now,
+      Expired = ExpireTime<Now,
       DeviceExist =maps:is_key(<<"PK_Device">>,IdentityJson),
       UserExist =maps:is_key(<<"PK_User">>,IdentityJson) and
         maps:is_key(<<"PK_Server_Auth">>,IdentityJson) and
