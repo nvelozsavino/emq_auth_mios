@@ -298,7 +298,6 @@ get_device_topics(PK_Device,[H|T],Topics)->
   if
     Update ->
       NewPubTopics = [
-          to_string(PK_Device)++"/"++ClientId++"/out",
           to_string(PK_Device)++"/"++ClientId++"/ud"],
       NewSubTopics = [
           to_string(PK_Device)++"/"++ClientId++"/alive"],
@@ -309,7 +308,9 @@ get_device_topics(PK_Device,[H|T],Topics)->
       get_device_topics(PK_Device,T,Topics)
   end;
 get_device_topics(PK_Device,[],Topics)->
-  Pub=[to_string(PK_Device)++"/connected",to_string(PK_Device)++"/source"],
+  Pub=[to_string(PK_Device)++"/connected",
+      to_string(PK_Device)++"/source",
+      to_string(PK_Device)++"/+/out"],
   Sub=["+/connected",
       to_string(PK_Device)++"/source",
       to_string(PK_Device)++"/+/in"],
