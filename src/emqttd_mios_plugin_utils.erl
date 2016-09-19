@@ -259,7 +259,7 @@ get_user_topics(ClientId,DeviceList,WhiteList)->
   get_user_topics(ClientId,DeviceList,{[],[]},WhiteList).
 
 get_user_topics(ClientId,[H|T],Topics,WhiteList)->
-  {_,PK_Device}=H,
+  {_,PK_Device,_}=H,
   Update = (WhiteList == all) orelse (list_contains(PK_Device,WhiteList)),
   if
     Update ->
