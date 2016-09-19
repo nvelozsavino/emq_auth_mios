@@ -21,19 +21,19 @@
 -record(state, {certificate}).
 
 get_public_key(Opts)->
-  PublicKeyFile = "/opt/emqtt/etc/pubkey.pem",
-  PublicKey = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
-  PublicKey.
-%%  PublicKeyFile = get_value(certificate, Opts, "default_pubkey.pem"),
-%%  io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
-%%  Verify= gen_conf:value(emqttd_mios_plugin, verify),
-%%  if
-%%    Verify==false ->
-%%      no_verify;
-%%    true->
-%%      PublicKey = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
-%%      PublicKey
-%%  end.
+%%  PublicKeyFile = "/opt/emqtt/etc/pubkey.pem",
+%%  PublicKey = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
+%%  PublicKey.
+  PublicKeyFile = get_value(certificate, Opts, "default_pubkey.pem"),
+  io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
+  Verify= gen_conf:value(emqttd_mios_plugin, verify),
+  if
+    Verify==false ->
+      no_verify;
+    true->
+      PublicKey = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
+      PublicKey
+  end.
 
 
 init(Opts) ->
