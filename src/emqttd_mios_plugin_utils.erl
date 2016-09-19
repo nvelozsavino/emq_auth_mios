@@ -113,7 +113,7 @@ get_token_type(IdentityJson) ->
 %%          io:format("ClientId ~p~n",[Client_Id]),
           PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
           Username = binary_to_list(maps:get(<<"Username">>,IdentityJson)),
-          PermissionsExist=maps:is_key(<<"Permissions">>,IdentityJson),
+          PermissionsExist=false,%%maps:is_key(<<"Permissions">>,IdentityJson),
           if
             PermissionsExist ->
 %%              io:format("Permissions exist~n"),
@@ -164,8 +164,8 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
               case get_token_type(IdentityJson) of
                 {user,PK_Account,TokenClientId,TokenUsername,WhiteList} ->
                   Authorized = (UserName == TokenUsername) and (TokenClientId==ClientId),
-%%                  io:format("Required Username: ~p  Username: ~p~n",[TokenUsername,UserName]),
-%%                  io:format("Required ClientId: ~p  ClientId: ~p~n",[TokenClientId,ClientId]),
+                  io:format("Required Username: ~p  Username: ~p~n",[TokenUsername,UserName]),
+                  io:format("Required ClientId: ~p  ClientId: ~p~n",[TokenClientId,ClientId]),
                   if
                     Authorized ->
                       register_user(PK_Account,ClientId,WhiteList),
@@ -179,8 +179,8 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
                   PK_DeviceStr=to_string(PK_Device),
                   CleanedClientId= clean_device_client_id(ClientId),
                   Authorized = (UserName == PK_DeviceStr) and (PK_DeviceStr==CleanedClientId),
-%%                  io:format("Required Username: ~p  Username: ~p~n",[PK_DeviceStr,UserName]),
-%%                  io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,CleanedClientId]),
+                  io:format("Required Username: ~p  Username: ~p~n",[PK_DeviceStr,UserName]),
+                  io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,CleanedClientId]),
                   if
                     Authorized ->
                       register_device(PK_Account,PK_Device,ClientId),
@@ -191,39 +191,37 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
                       {error,not_authorized}
                   end;
                 expired ->
-%%                  io:format("Token expired~n"),
+                  io:format("Token expired~n"),
                   {error,expired_token};
                 _Else ->
-%%                  io:format("Unrecognized TokenType ~p~n",[_Else]),
+                  io:format("Unrecognized TokenType ~p~n",[_Else]),
                   {error,unrecongized_token}
               end;
             true ->
-%%              io:format("Signature Failed ~n"),
+              io:format("Signature Failed ~n"),
               {error,signature_failed}
           end;
       false ->
-%%        io:format("Token unrecognized ~n"),
+        io:format("Token unrecognized ~n"),
         {error,token_unrecognized}
     end
   catch
     throw:Error ->
-%%      io:format("Throw ~p~n",[Error]),
+      io:format("Throw ~p~n",[Error]),
       {error,Error}
   end.
 
 
 register_device(PK_Account,PK_Device,ClientId) ->
-%%  io:format("register_device: Device ~p inserted~n",[PK_Device]),
+  io:format("register_device: Device ~p inserted~n",[PK_Device]),
   ets:insert(?DEVICES_DATABASE,{PK_Account,PK_Device,ClientId}),
   ets:insert(?CLIENTS_DATABASE,{ClientId,device,{PK_Account,PK_Device}}).
-%%  io:format("register_device: Client ~p inserted~n",[PK_Device]).
 
 
 register_user(PK_Account,ClientId,WhiteList) ->
-%%  io:format("register_user: User ~p inserted~n",[ClientId]),
+  io:format("register_user: User ~p inserted~n",[ClientId]),
   ets:insert(?USERS_DATABASE,{PK_Account,ClientId,WhiteList}),
   ets:insert(?CLIENTS_DATABASE,{ClientId,user,{PK_Account,ClientId}}).
-%%  io:format("register_user: Client ~p inserted~n",[ClientId]).
 
 ets_lookup(Table,Key) ->
   TableNotExist=(ets:info(Table)==undefined),
@@ -234,14 +232,14 @@ ets_lookup(Table,Key) ->
   end.
 
 update_clients(PK_Account) ->
-%%  io:format("update_clients: Updating clients on Account ~p~n",[PK_Account]),
+  io:format("update_clients: Updating clients on Account ~p~n",[PK_Account]),
   Devices = ets_lookup(?DEVICES_DATABASE,PK_Account),
-%%  io:format("update_clients: Devices: ~p~n",[Devices]),
+  io:format("update_clients: Devices: ~p~n",[Devices]),
   Users = ets_lookup(?USERS_DATABASE,PK_Account),
-%%  io:format("update_clients: Users: ~p~n",[Users]),
+  io:format("update_clients: Users: ~p~n",[Users]),
   update_users_topics(Users,Devices),
   update_device_topics(Devices,Users).
-%%  io:format("update_clients: Done Updating clients on Account ~p~n",[PK_Account]).
+  io:format("update_clients: Done Updating clients on Account ~p~n",[PK_Account]).
 
 list_contains(Element,[H|L])->
   Exist = (Element == H),
@@ -284,7 +282,7 @@ get_user_topics(ClientId,[],Topics,_)->
   Pub=[ClientId++"/connected"],
   Sub=["+/connected"],
   NewTopics=insert_topics(Sub,Pub,Topics),
-%%  io:format("get_user_topics: ~p Ending with topics: ~p~n",[ClientId,NewTopics]),
+  io:format("get_user_topics: ~p Ending with topics: ~p~n",[ClientId,NewTopics]),
   NewTopics.
 
 
@@ -315,7 +313,7 @@ get_device_topics(PK_Device,[],Topics)->
       to_string(PK_Device)++"/source",
       to_string(PK_Device)++"/+/in"],
   NewTopics= insert_topics(Sub,Pub,Topics),
-%%  io:format("get_device_topics: ~p Ending with topics: ~p~n",[PK_Device,NewTopics]),
+  io:format("get_device_topics: ~p Ending with topics: ~p~n",[PK_Device,NewTopics]),
   NewTopics.
 
 
