@@ -122,8 +122,6 @@ get_token_type(IdentityJson) ->
             true->
               {user, PK_Account,Client_Id,Username,all}
           end;
-
-
         true-> throw(invalid_token)
       end;
     true-> throw(invalid_token)
@@ -238,7 +236,7 @@ update_clients(PK_Account) ->
   Users = ets_lookup(?USERS_DATABASE,PK_Account),
   io:format("update_clients: Users: ~p~n",[Users]),
   update_users_topics(Users,Devices),
-  update_device_topics(Devices,Users).
+  update_device_topics(Devices,Users),
   io:format("update_clients: Done Updating clients on Account ~p~n",[PK_Account]).
 
 list_contains(Element,[H|L])->
