@@ -69,31 +69,31 @@ bin_to_list(Binary)->
   end.
 
 process_white_list(WhiteListString)->
-  io:format("No process_white_list~p~n",[WhiteListString]),
+%%  io:format("No process_white_list~p~n",[WhiteListString]),
   IsString=io_lib:printable_list(WhiteListString),
   if
     IsString->
-      io:format("Is String~n"),
+%%      io:format("Is String~n"),
       {Match,Matches}=re:run(WhiteListString,"^\\[(.*)\\]$"),
-      io:format("Match found? ~p,~p~n",[Match,Matches]),
+%%      io:format("Match found? ~p,~p~n",[Match,Matches]),
       case Match of
         match ->
           MatchesLen=length(Matches),
           if
             MatchesLen==2 ->
-              io:format("Matches length =~p~n",[MatchesLen]),
+%%              io:format("Matches length =~p~n",[MatchesLen]),
               Indexes=tuple_to_list(lists:nth(2,Matches)),
-              io:format("Indexes =~p~n",[Indexes]),
+%%              io:format("Indexes =~p~n",[Indexes]),
               Start=lists:nth(1,Indexes)+1,
-              io:format("Start =~p~n",[Start]),
+%%              io:format("Start =~p~n",[Start]),
               End=lists:nth(2,Indexes),
-              io:format("End =~p~n",[End]),
+%%              io:format("End =~p~n",[End]),
               MatchesString=string:substr(WhiteListString,Start,End),
-              io:format("Match String=~p~n",[MatchesString]),
+%%              io:format("Match String=~p~n",[MatchesString]),
               DeviceLists=string:tokens(MatchesString,","),
-              io:format("Device List String=~p~n",[DeviceLists]),
+%%              io:format("Device List String=~p~n",[DeviceLists]),
               List=intstr_list_to_list(DeviceLists),
-              io:format("Device List=~p~n",[List]),
+%%              io:format("Device List=~p~n",[List]),
               case List of
                 error -> all;
                 [] -> all;
@@ -107,30 +107,30 @@ process_white_list(WhiteListString)->
 
 get_white_list([])-> all;
 get_white_list([H|T]) ->
-  io:format("get_white_list~p~n",[H]),
+%%  io:format("get_white_list~p~n",[H]),
   if
     H==41 ->
-      io:format("Is number~n"),
+%%      io:format("Is number~n"),
       all;
     is_map(H) ->
       PK_Exist=maps:is_key(<<"PK">>,H),
-      io:format("Is Map~n"),
+%%      io:format("Is Map~n"),
       if
         PK_Exist ->
           PK = maps:get(<<"PK">>,H),
-          io:format("PK=~p~n",[PK]),
+%%          io:format("PK=~p~n",[PK]),
           PK_Perm41=(PK==41),
           if
             PK_Perm41 ->
-              io:format("Is perm 41~n"),
+%%              io:format("Is perm 41~n"),
               ArgumentExist=maps:is_key(<<"Arguments">>,H),
               if
                 ArgumentExist->
                   Arguments= maps:get(<<"Arguments">>,H),
-                  io:format("Arguments~p~n",[Arguments]),
+%%                  io:format("Arguments~p~n",[Arguments]),
                   process_white_list(bin_to_list(Arguments));
                 true ->
-                  io:format("No Arguments~n"),
+%%                  io:format("No Arguments~n"),
                   all
               end;
             true -> get_white_list(T)
@@ -187,7 +187,7 @@ get_token_type(IdentityJson) ->
           if
             PermissionsExist ->
               Permissions = maps:get(<<"PermissionsEnabled">>,IdentityJson),
-              io:format("Permissions exist: ~p~n",[Permissions]),
+%%              io:format("Permissions exist: ~p~n",[Permissions]),
               WhiteList=get_white_list(Permissions),
               io:format("WhiteList: ~p~n",[WhiteList]),
               {user, PK_Account,Client_Id,Username,WhiteList};
