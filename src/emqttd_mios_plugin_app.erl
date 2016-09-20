@@ -32,8 +32,8 @@ get_public_key(Opts)->
   end.
 
 get_superuser_info(Opts)->
-  SuperUser = get_value(superuser,Opts,no_super_user),
-  SuperPassword = get_value(superuser,Opts,no_super_pass),
+  SuperUser =     get_value(superuser,Opts,no_super_user),
+  SuperPassword = get_value(superpass,Opts,no_super_pass),
   {SuperUser,SuperPassword}.
 
 

@@ -28,7 +28,9 @@ check(#mqtt_client{client_id = ClientId, username = Username}, Password, {Public
   IsSuperUser = (SuperUser==binary_to_list(Username)) andalso ((not SuperUser == no_super_user) andalso
     (SuperPassword==no_super_pass orelse SuperPassword == binary_to_list(Password))),
   if
-    IsSuperUser -> ok;
+    IsSuperUser ->
+      io:format("login as superuser~n"),
+      ok;
     true ->
       emqttd_mios_plugin_utils:check_auth(PublicKey,binary_to_list(Username),Password,binary_to_list(ClientId))
   end.
