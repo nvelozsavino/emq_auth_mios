@@ -75,7 +75,7 @@ process_white_list(WhiteListString)->
           if
             MatchesLen==2 ->
               io:format("Matches length =~p~n",[MatchesLen]),
-              Indexes=lists:nth(2,Matches),
+              Indexes=tuple_to_list(lists:nth(2,Matches)),
               io:format("Indexes =~p~n",[Indexes]),
               Start=lists:nth(1,Indexes)+1,
               io:format("Start =~p~n",[Start]),
