@@ -19,7 +19,7 @@
 start(_StartType, _StartArgs) ->
   gen_conf:init(?APP),
   {ok, Sup} = emqttd_mios_plugin_sup:start_link(),
-  Opts = gen_conf:value(?APP,mios),
+  {ok,Opts} = gen_conf:value(?APP,mios),
   emqttd_mios_plugin:load([]),
   ok = emqttd_access_control:register_mod(auth, emqttd_mios_plugin_auth, Opts),
   ok = emqttd_access_control:register_mod(acl, emqttd_mios_plugin_acl, []),
