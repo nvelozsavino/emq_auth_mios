@@ -24,6 +24,7 @@ get_public_key(Opts)->
   io:format("Verify: ~p~n",[Verify]),
   if
     Verify==false ->
+      io:format("Signature Verification disabled~n"),
       no_verify;
     true->
       PublicKey = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
