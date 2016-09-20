@@ -61,6 +61,13 @@ intstr_list_to_list([H|T],List) ->
 intstr_list_to_list([],List)->
   List.
 
+bin_to_list(Binary)->
+  if
+    is_binary(Binary) ->
+      binary_to_list(Binary);
+    true-> Binary
+  end.
+
 process_white_list(WhiteListString)->
   io:format("No process_white_list~p~n",[WhiteListString]),
   IsString=io_lib:printable_list(WhiteListString),
@@ -121,7 +128,7 @@ get_white_list([H|T]) ->
                 ArgumentExist->
                   Arguments= maps:get(<<"Arguments">>,H),
                   io:format("Arguments~p~n",[Arguments]),
-                  process_white_list(Arguments);
+                  process_white_list(bin_to_list(Arguments));
                 true ->
                   io:format("No Arguments~n"),
                   all
