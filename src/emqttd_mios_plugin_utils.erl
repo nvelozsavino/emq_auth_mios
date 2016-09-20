@@ -53,7 +53,7 @@ intstr_list_to_list([H|T],List) ->
   {Number,_Rest}=string:to_integer(H),
   case Number of
     error ->
-      io:format("error, no number ~p~n",H),
+      io:format("error, no number ~p~n",[H]),
       error;
     Num->
       intstr_list_to_list(T,[Num]++List)
@@ -62,31 +62,31 @@ intstr_list_to_list([],List)->
   List.
 
 process_white_list(WhiteListString)->
-  io:format("No process_white_list~p~n",WhiteListString),
+  io:format("No process_white_list~p~n",[WhiteListString]),
   IsString=io_lib:printable_list(WhiteListString),
   if
     IsString->
       io:format("Is String~n"),
       {Match,Matches}=re:run(WhiteListString,"^\\[(.*)\\]$"),
-      io:format("Match found? ~p,~p~n",Match,Matches),
+      io:format("Match found? ~p,~p~n",[Match,Matches]),
       case Match of
         match ->
           MatchesLen=length(Matches),
           if
             MatchesLen==2 ->
-              io:format("Matches length =~p~n",MatchesLen),
+              io:format("Matches length =~p~n",[MatchesLen]),
               Indexes=lists:nth(2,Matches),
-              io:format("Indexes =~p~n",Indexes),
+              io:format("Indexes =~p~n",[Indexes]),
               Start=lists:nth(1,Indexes)+1,
-              io:format("Start =~p~n",Start),
+              io:format("Start =~p~n",[Start]),
               End=lists:nth(2,Indexes),
-              io:format("End =~p~n",End),
+              io:format("End =~p~n",[End]),
               MatchesString=string:substr(WhiteListString,Start,End),
-              io:format("Match String=~p~n",MatchesString),
+              io:format("Match String=~p~n",[MatchesString]),
               DeviceLists=string:tokens(MatchesString,","),
-              io:format("Device List String=~p~n",DeviceLists),
+              io:format("Device List String=~p~n",[DeviceLists]),
               List=intstr_list_to_list(DeviceLists),
-              io:format("Device List=~p~n",List),
+              io:format("Device List=~p~n",[List]),
               case List of
                 error -> all;
                 [] -> all;
@@ -98,9 +98,9 @@ process_white_list(WhiteListString)->
     true -> WhiteListString
   end.
 
-
+get_white_list([])-> all;
 get_white_list([H|T]) ->
-  io:format("get_white_list~p~n",H),
+  io:format("get_white_list~p~n",[H]),
   if
     H==41 ->
       io:format("Is number~n"),
@@ -111,7 +111,7 @@ get_white_list([H|T]) ->
       if
         PK_Exist ->
           PK = maps:get(<<"PK">>,H),
-          io:format("PK=~p~n",PK),
+          io:format("PK=~p~n",[PK]),
           PK_Perm41=(PK==41),
           if
             PK_Perm41 ->
@@ -120,7 +120,7 @@ get_white_list([H|T]) ->
               if
                 ArgumentExist->
                   Arguments= maps:get(<<"Arguments">>,H),
-                  io:format("Arguments~p~n",Arguments),
+                  io:format("Arguments~p~n",[Arguments]),
                   process_white_list(binary_to_list(Arguments));
                 true ->
                   io:format("No Arguments~n"),
@@ -131,8 +131,7 @@ get_white_list([H|T]) ->
         true-> get_white_list(T)
       end;
     true -> get_white_list(T)
-  end;
-get_white_list([])-> all.
+  end.
 
 get_timestamp()->
   {Mega, Secs, _} = erlang:timestamp(),
