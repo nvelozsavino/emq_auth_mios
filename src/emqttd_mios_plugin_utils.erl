@@ -121,7 +121,7 @@ get_white_list([H|T]) ->
                 ArgumentExist->
                   Arguments= maps:get(<<"Arguments">>,H),
                   io:format("Arguments~p~n",[Arguments]),
-                  process_white_list(binary_to_list(Arguments));
+                  process_white_list(Arguments);
                 true ->
                   io:format("No Arguments~n"),
                   all
