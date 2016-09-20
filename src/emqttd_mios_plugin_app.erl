@@ -17,11 +17,11 @@
 -export([start/2, stop/1]).
 
 get_public_key(Opts)->
-  io:format("Options: ~p~n",[Opts]),
+%%  io:format("Options: ~p~n",[Opts]),
   PublicKeyFile = get_value(certificate, Opts, "/opt/emqtt/etc/pubkey.pem"),
   io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
   Verify= gen_conf:value(verify,Opts, true),
-  io:format("Verify: ~p~n",[Verify]),
+%%  io:format("Verify: ~p~n",[Verify]),
   if
     Verify==false ->
       io:format("Signature Verification disabled~n"),
