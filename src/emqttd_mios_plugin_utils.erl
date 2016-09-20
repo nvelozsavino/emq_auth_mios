@@ -210,6 +210,62 @@ clean_device_client_id(ClientID)->
   end.
 
 
+do_auth(PublicKey,ClientId, Username,Password)->
+  case maps:is_key(<<"Identity">>,Password) and maps:is_key(<<"IdentitySignature">>,Password) of
+    true ->
+      Identity=maps:get(<<"Identity">>,Password),
+      IdentitySignature=maps:get(<<"IdentitySignature">>,Password),
+      SignatureVerified = (PublicKey == no_verify) orelse (verify_signature(Identity,IdentitySignature,PublicKey)),
+      if
+        SignatureVerified ->
+          IdentityDecoded = decode_base64(Identity),
+          IdentityJson = get_json(IdentityDecoded),
+          case get_token_type(IdentityJson) of
+            {user,PK_Account,TokenClientId,TokenUsername,WhiteList} ->
+              Authorized = (Username == TokenUsername) and (TokenClientId==ClientId),
+              io:format("Required Username: ~p  Username: ~p~n",[TokenUsername, Username]),
+              io:format("Required ClientId: ~p  ClientId: ~p~n",[TokenClientId,ClientId]),
+              if
+                Authorized ->
+                  register_user(PK_Account,ClientId,WhiteList),
+                  update_clients(PK_Account),
+                  io:format("check_auth: Allowed user ~p~n-----------------------~n",[ClientId]),
+                  ok;
+                true->
+                  {error,not_authorized}
+              end;
+            {device,PK_Account,PK_Device} ->
+              PK_DeviceStr=to_string(PK_Device),
+              CleanedClientId= clean_device_client_id(ClientId),
+              Authorized = (Username == PK_DeviceStr) and (PK_DeviceStr==CleanedClientId),
+              io:format("Required Username: ~p  Username: ~p~n",[PK_DeviceStr, Username]),
+              io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,CleanedClientId]),
+              if
+                Authorized ->
+                  register_device(PK_Account,PK_Device,ClientId),
+                  update_clients(PK_Account),
+                  io:format("check_auth: Allowed device ~p~n-----------------------~n",[PK_Device]),
+                  ok;
+                true->
+                  {error,not_authorized}
+              end;
+            expired ->
+              io:format("Token expired~n"),
+              {error,expired_token};
+            _Else ->
+              io:format("Unrecognized TokenType ~p~n",[_Else]),
+              {error,unrecongized_token}
+          end;
+        true ->
+          io:format("Signature Failed ~n"),
+          {error,signature_failed}
+      end;
+    false ->
+      io:format("Token unrecognized ~n"),
+      {error,token_unrecognized}
+  end.
+
+
 check_auth(PublicKey,_,_,_) when ?EMPTY(PublicKey)->
   {error,public_key_undefined};
 check_auth(_,UserName,_,_) when ?EMPTY(UserName)->
@@ -222,58 +278,9 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
 %%  io:format("ClientID: ~p~nUsername: ~p~nPassword: ~p~n",[ClientId,UserName,Password]),
   try
     JsonToken = get_json(Password),
-    case maps:is_key(<<"Identity">>,JsonToken) and maps:is_key(<<"IdentitySignature">>,JsonToken) of
-      true ->
-        Identity=maps:get(<<"Identity">>,JsonToken),
-        IdentitySignature=maps:get(<<"IdentitySignature">>,JsonToken),
-        SignatureVerified = (PublicKey == no_verify) orelse (verify_signature(Identity,IdentitySignature,PublicKey)),
-          if
-            SignatureVerified ->
-              IdentityDecoded = decode_base64(Identity),
-              IdentityJson = get_json(IdentityDecoded),
-              case get_token_type(IdentityJson) of
-                {user,PK_Account,TokenClientId,TokenUsername,WhiteList} ->
-                  Authorized = (UserName == TokenUsername) and (TokenClientId==ClientId),
-                  io:format("Required Username: ~p  Username: ~p~n",[TokenUsername,UserName]),
-                  io:format("Required ClientId: ~p  ClientId: ~p~n",[TokenClientId,ClientId]),
-                  if
-                    Authorized ->
-                      register_user(PK_Account,ClientId,WhiteList),
-                      update_clients(PK_Account),
-                      io:format("check_auth: Allowed user ~p~n-----------------------~n",[ClientId]),
-                      ok;
-                    true->
-                      {error,not_authorized}
-                  end;
-                {device,PK_Account,PK_Device} ->
-                  PK_DeviceStr=to_string(PK_Device),
-                  CleanedClientId= clean_device_client_id(ClientId),
-                  Authorized = (UserName == PK_DeviceStr) and (PK_DeviceStr==CleanedClientId),
-                  io:format("Required Username: ~p  Username: ~p~n",[PK_DeviceStr,UserName]),
-                  io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,CleanedClientId]),
-                  if
-                    Authorized ->
-                      register_device(PK_Account,PK_Device,ClientId),
-                      update_clients(PK_Account),
-                      io:format("check_auth: Allowed device ~p~n-----------------------~n",[PK_Device]),
-                      ok;
-                    true->
-                      {error,not_authorized}
-                  end;
-                expired ->
-                  io:format("Token expired~n"),
-                  {error,expired_token};
-                _Else ->
-                  io:format("Unrecognized TokenType ~p~n",[_Else]),
-                  {error,unrecongized_token}
-              end;
-            true ->
-              io:format("Signature Failed ~n"),
-              {error,signature_failed}
-          end;
-      false ->
-        io:format("Token unrecognized ~n"),
-        {error,token_unrecognized}
+    if
+      is_map(JsonToken) -> do_auth(PublicKey,ClientId,UserName,Password);
+      true->{error,invalid_token}
     end
   catch
     throw:Error ->
