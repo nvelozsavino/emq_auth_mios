@@ -16,34 +16,21 @@
 
 %% API
 -export([init/1, check/3, description/0]).
--import(proplists, [get_value/3]).
-
--record(state, {certificate}).
-
-get_public_key(Opts)->
-  PublicKeyFile = get_value(certificate, Opts, "/opt/emqtt/etc/pubkey.pem"),
-  io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
-  Verify= gen_conf:value(emqttd_mios_plugin, verify),
-  if
-    Verify==false ->
-      no_verify;
-    true->
-      PublicKey = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
-      PublicKey
-  end.
-
 
 init(Opts) ->
-  PublicKey=get_public_key(Opts),
   io:format("init: Init Auth mios plugin~n"),
-
-  {ok,#state{certificate = PublicKey}}.
+  {ok,Opts}.
 
 check(_Client,Username,Password) when Username==undefined orelse Password==undefined ->
   {error,undefined_credentials};
-check(#mqtt_client{client_id = ClientId, username = Username}, Password,#state{certificate = PublicKey}) ->
-  io:format("MiOS Auth: clientId=~p, username=~p, password=~p~n",
-    [ClientId, Username, Password]),
-  emqttd_mios_plugin_utils:check_auth(PublicKey,binary_to_list(Username),Password,binary_to_list(ClientId)).
+check(#mqtt_client{client_id = ClientId, username = Username}, Password, {PublicKey, SuperUser, SuperPassword})->
+  io:format("MiOS Auth: clientId=~p, username=~p, password=~p~n", [ClientId, Username, Password]),
+  IsSuperUser = (SuperUser==binary_to_list(Username)) andalso ((not SuperUser == no_super_user) andalso
+    (SuperPassword==no_super_pass orelse SuperPassword == binary_to_list(Password))),
+  if
+    IsSuperUser -> ok;
+    true ->
+      emqttd_mios_plugin_utils:check_auth(PublicKey,binary_to_list(Username),Password,binary_to_list(ClientId))
+  end.
 
 description() -> "MiOS Auth Module".

@@ -47,26 +47,90 @@ verify_signature(Identity, IdentitySignature,PubKey) ->
 
 to_string(Number)->
   lists:flatten(io_lib:format("~p", [Number])).
+intstr_list_to_list(StrList)->
+  intstr_list_to_list(StrList,[]).
+intstr_list_to_list([H|T],List) ->
+  {Number,_Rest}=string:to_integer(H),
+  case Number of
+    error ->
+      io:format("error, no number ~p~n",H),
+      error;
+    Num->
+      intstr_list_to_list(T,[Num]++List)
+  end;
+intstr_list_to_list([],List)->
+  List.
 
-get_white_list([H|L]) ->
-  PK_PermExist=maps:is_key(<<"PK_Permission">>,H),
+process_white_list(WhiteListString)->
+  io:format("No process_white_list~p~n",WhiteListString),
+  IsString=io_lib:printable_list(WhiteListString),
   if
-    PK_PermExist ->
-      PK_PermNum = maps:get(<<"PK_Permission">>,H),
-      PK_Perm41=PK_PermNum==41,
-      if
-        PK_Perm41 ->
-          ArgumentExist=maps:is_key(<<"Arguments">>,H),
+    IsString->
+      io:format("Is String~n"),
+      {Match,Matches}=re:run(WhiteListString,"^\\[(.*)\\]$"),
+      io:format("Match found? ~p,~p~n",Match,Matches),
+      case Match of
+        match ->
+          MatchesLen=length(Matches),
           if
-            ArgumentExist ->
-              maps:get(<<"Arguments">>,H);
-            true -> all
+            MatchesLen==2 ->
+              io:format("Matches length =~p~n",MatchesLen),
+              Indexes=lists:nth(2,Matches),
+              io:format("Indexes =~p~n",Indexes),
+              Start=lists:nth(1,Indexes)+1,
+              io:format("Start =~p~n",Start),
+              End=lists:nth(2,Indexes),
+              io:format("End =~p~n",End),
+              MatchesString=string:substr(WhiteListString,Start,End),
+              io:format("Match String=~p~n",MatchesString),
+              DeviceLists=string:tokens(MatchesString,","),
+              io:format("Device List String=~p~n",DeviceLists),
+              List=intstr_list_to_list(DeviceLists),
+              io:format("Device List=~p~n",List),
+              case List of
+                error -> all;
+                [] -> all;
+                L -> L
+              end
           end;
-        true ->
-          get_white_list(L)
+        _Else -> all
       end;
-    true ->
-      get_white_list(L)
+    true -> WhiteListString
+  end.
+
+
+get_white_list([H|T]) ->
+  io:format("get_white_list~p~n",H),
+  if
+    H==41 ->
+      io:format("Is number~n"),
+      all;
+    is_map(H) ->
+      PK_Exist=maps:is_key(<<"PK">>,H),
+      io:format("Is Map~n"),
+      if
+        PK_Exist ->
+          PK = maps:get(<<"PK">>,H),
+          io:format("PK=~p~n",PK),
+          PK_Perm41=(PK==41),
+          if
+            PK_Perm41 ->
+              io:format("Is perm 41~n"),
+              ArgumentExist=maps:is_key(<<"Arguments">>,H),
+              if
+                ArgumentExist->
+                  Arguments= maps:get(<<"Arguments">>,H),
+                  io:format("Arguments~p~n",Arguments),
+                  process_white_list(binary_to_list(Arguments));
+                true ->
+                  io:format("No Arguments~n"),
+                  all
+              end;
+            true -> get_white_list(T)
+          end;
+        true-> get_white_list(T)
+      end;
+    true -> get_white_list(T)
   end;
 get_white_list([])-> all.
 
@@ -113,12 +177,14 @@ get_token_type(IdentityJson) ->
 %%          io:format("ClientId ~p~n",[Client_Id]),
           PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
           Username = binary_to_list(maps:get(<<"Username">>,IdentityJson)),
-          PermissionsExist=false,%%maps:is_key(<<"Permissions">>,IdentityJson),
+          PermissionsExist=maps:is_key(<<"PermissionsEnabled">>,IdentityJson),
           if
             PermissionsExist ->
-%%              io:format("Permissions exist~n"),
-              Permissions = maps:get(<<"Permissions">>,IdentityJson),
-              {user, PK_Account,Client_Id,Username,get_white_list(Permissions)};
+              Permissions = maps:get(<<"PermissionsEnabled">>,IdentityJson),
+              io:format("Permissions exist: ~p~n",[Permissions]),
+              WhiteList=get_white_list(Permissions),
+              io:format("WhiteList: ~p~n",[WhiteList]),
+              {user, PK_Account,Client_Id,Username,WhiteList};
             true->
               {user, PK_Account,Client_Id,Username,all}
           end;
