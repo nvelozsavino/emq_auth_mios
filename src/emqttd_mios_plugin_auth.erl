@@ -25,8 +25,10 @@ check(_Client,Username,Password) when Username==undefined orelse Password==undef
   {error,undefined_credentials};
 check(#mqtt_client{client_id = ClientId, username = Username}, Password, {PublicKey, SuperUser, SuperPassword})->
   io:format("MiOS Auth: clientId=~p, username=~p, password=~p~n", [ClientId, Username, Password]),
-  IsSuperUser = (SuperUser==binary_to_list(Username)) andalso ((not SuperUser == no_super_user) andalso
-    (SuperPassword==no_super_pass orelse SuperPassword == binary_to_list(Password))),
+  io:format("MiOS Auth: SuperUser=~p, SuperPassword=~p~n", [SuperUser,SuperPassword]),
+  IsSuperUser = (SuperUser==binary_to_list(Username)) andalso
+    ((not (SuperUser == no_super_user)) andalso
+    ((SuperPassword==no_super_pass) orelse (SuperPassword == binary_to_list(Password)))),
   if
     IsSuperUser ->
       io:format("login as superuser~n"),
