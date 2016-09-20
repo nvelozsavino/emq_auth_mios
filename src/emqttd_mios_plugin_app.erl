@@ -55,4 +55,7 @@ start(_StartType, _StartArgs) ->
   {ok, Sup}.
 
 stop(_State) ->
-  emqttd_mios_plugin:unload().
+  emqttd_mios_plugin:unload(),
+  emqttd_access_control:unregister_mod(acl, emqttd_mios_plugin_acl),
+  emqttd_access_control:unregister_mod(auth, emqttd_mios_plugin_auth).
+
