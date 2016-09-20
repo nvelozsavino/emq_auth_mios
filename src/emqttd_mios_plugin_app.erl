@@ -20,8 +20,9 @@ get_public_key(Opts)->
   PublicKeyFile = get_value(certificate, Opts, "/opt/emqtt/etc/pubkey.pem"),
   io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
   Verify= gen_conf:value(emqttd_mios_plugin, verify),
+  io:format("Verify: ~p~n",[Verify]),
   if
-    Verify==false ->
+    Verify=="false" ->
       no_verify;
     true->
       PublicKey = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
