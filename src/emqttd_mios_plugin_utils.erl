@@ -279,7 +279,7 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
   try
     JsonToken = get_json(Password),
     if
-      is_map(JsonToken) -> do_auth(PublicKey,ClientId,UserName,Password);
+      is_map(JsonToken) -> do_auth(PublicKey,ClientId,UserName,JsonToken);
       true->{error,invalid_token}
     end
   catch
