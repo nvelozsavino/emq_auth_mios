@@ -18,9 +18,9 @@
 
 get_public_key()->
 %%  io:format("Options: ~p~n",[Opts]),
-  PublicKeyFile = application:get_env(?APP, certificate, "/opt/emqtt/etc/pubkey.pem"),
+  PublicKeyFile = application:get_env(?APP, certificate),
   io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
-  Verify= application:get_env(?APP,verify,true),
+  Verify= application:get_env(?APP,verify),
 %%  io:format("Verify: ~p~n",[Verify]),
   if
     Verify==false ->
