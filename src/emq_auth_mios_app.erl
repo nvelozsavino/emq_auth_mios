@@ -33,8 +33,7 @@ get_public_key()->
 
 get_superuser_info()->
   SuperUser =     application:get_env(?APP,superuser,no_super_user),
-  io:format("Superuser: ~p~n",[SuperUser]),
-  {ok,SuperPassword} = application:get_env(?APP,superpass,no_super_pass),
+  SuperPassword = application:get_env(?APP,superpass,no_super_pass),
   {SuperUser,SuperPassword}.
 
 
