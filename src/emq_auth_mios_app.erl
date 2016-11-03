@@ -18,7 +18,7 @@
 
 get_public_key()->
 %%  io:format("Options: ~p~n",[Opts]),
-  PublicKeyFile = application:get_env(?APP, certificate),
+  {ok,PublicKeyFile} = application:get_env(?APP, certificate),
   io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
   Verify= application:get_env(?APP,verify),
 %%  io:format("Verify: ~p~n",[Verify]),
@@ -32,8 +32,8 @@ get_public_key()->
   end.
 
 get_superuser_info()->
-  SuperUser =     application:get_env(?APP,superuser,no_super_user),
-  SuperPassword = application:get_env(?APP,superpass,no_super_pass),
+  {ok,SuperUser} =     application:get_env(?APP,superuser,no_super_user),
+  {ok,SuperPassword} = application:get_env(?APP,superpass,no_super_pass),
   {SuperUser,SuperPassword}.
 
 
