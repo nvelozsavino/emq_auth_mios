@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 16. Sep 2016 07:57 AM
 %%%-------------------------------------------------------------------
--module(emqttd_mios_plugin_acl).
+-module(emq_auth_mios_acl).
 -author("nico").
 
 
@@ -25,7 +25,7 @@ check_acl({#mqtt_client{client_id = ClientId, username = Username}, PubSub, Topi
 check_acl({#mqtt_client{client_id = ClientId, username = Username}, PubSub, Topic}, SuperUser) ->
 %%  io:format("MiOS ACL: ~p ~p ~p~n", [ClientId, PubSub, Topic]),
   IsSuperUser = (SuperUser==binary_to_list(Username)),
-  Allow=IsSuperUser orelse emqttd_mios_plugin_utils:check_acl(binary_to_list(ClientId),PubSub,binary_to_list(Topic)),
+  Allow=IsSuperUser orelse emq_auth_mios_utils:check_acl(binary_to_list(ClientId),PubSub,binary_to_list(Topic)),
   if
     Allow ->
       allow;
@@ -34,7 +34,7 @@ check_acl({#mqtt_client{client_id = ClientId, username = Username}, PubSub, Topi
   end.
 
 reload_acl(_Opts) ->
-  emqttd_mios_plugin_utils:update_all_clients(),
+  emq_auth_mios_utils:update_all_clients(),
   ok.
 
 description() -> "MiOS ACL Module".

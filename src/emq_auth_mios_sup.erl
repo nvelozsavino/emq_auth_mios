@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 16. Sep 2016 07:31 AM
 %%%-------------------------------------------------------------------
--module(emqttd_mios_plugin_sup).
+-module(emq_auth_mios_sup).
 -author("nico").
 
 %% API

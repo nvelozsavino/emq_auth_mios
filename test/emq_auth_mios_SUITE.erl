@@ -1,14 +1,14 @@
 
--module(emqttd_mios_plugin_SUITE).
+-module(emq_auth_mios_SUITE).
 
 -compile(export_all).
 
 -include_lib("emqttd/include/emqttd.hrl").
 
 
-all() -> [{group,emqttd_mios_plugin}].
+all() -> [{group, emq_auth_mios}].
 
-groups() -> [{emqttd_mios_plugin,[sequence],[check_auth,check_acl]}].
+groups() -> [{emq_auth_mios,[sequence],[check_auth,check_acl]}].
 
 
 init_per_suite(Config) ->
@@ -18,12 +18,12 @@ init_per_suite(Config) ->
   application:set_env(emqttd, conf, filename:join([DataDir, "emqttd.conf"])),
   application:ensure_all_started(emqttd),
   io:format("DataDir: ~p~n",[DataDir]),
-  application:set_env(emqttd_mios_plugin, conf, filename:join([DataDir, "emqttd_mios_plugin.conf"])),
-  application:ensure_all_started(emqttd_mios_plugin),
+  application:set_env(emq_auth_mios, conf, filename:join([DataDir, "emq_auth_mios.conf"])),
+  application:ensure_all_started(emq_auth_mios),
   Config.
 
 end_per_suite(_Config) ->
-  application:stop(emqttd_mios_plugin),
+  application:stop(emq_auth_mios),
   application:stop(emqttd),
   emqttd_mnesia:ensure_stopped().
 

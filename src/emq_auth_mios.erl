@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 16. Sep 2016 07:33 AM
 %%%-------------------------------------------------------------------
--module(emqttd_mios_plugin).
+-module(emq_auth_mios).
 -author("nico").
 
 -include_lib("emqttd/include/emqttd.hrl").
@@ -20,17 +20,17 @@
 
 %% Called when the plugin application start
 load(Env) ->
-  emqttd_mios_plugin_utils:create_tables(),
+  emq_auth_mios_utils:create_tables(),
   emqttd:hook('client.disconnected', fun ?MODULE:on_client_disconnected/3, [Env]).
 
 
 on_client_disconnected(Reason, #mqtt_client{client_id = ClientId}, _Env) ->
   io:format("on_client_disconnected: client ~s disconnected, reason: ~w~n", [ClientId, Reason]),
-  emqttd_mios_plugin_utils:delete_client(binary_to_list(ClientId)),
+  emq_auth_mios_utils:delete_client(binary_to_list(ClientId)),
   ok.
 
 
 %% Called when the plugin application stop
 unload() ->
   emqttd:unhook('client.disconnected', fun ?MODULE:on_client_disconnected/3),
-  emqttd_mios_plugin_utils:delete_tables().
+  emq_auth_mios_utils:delete_tables().

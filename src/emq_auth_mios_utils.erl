@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 14. Sep 2016 12:32 PM
 %%%-------------------------------------------------------------------
--module(emqttd_mios_plugin_utils).
+-module(emq_auth_mios_utils).
 -author("nico").
 -include("emqttd_mios_plugin.hrl").
 

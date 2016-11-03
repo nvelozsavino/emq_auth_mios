@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 16. Sep 2016 07:41 AM
 %%%-------------------------------------------------------------------
--module(emqttd_mios_plugin_auth).
+-module(emq_auth_mios_auth).
 -author("nico").
 
 
@@ -34,7 +34,7 @@ check(#mqtt_client{client_id = ClientId, username = Username}, Password, {Public
       io:format("login as superuser~n"),
       ok;
     true ->
-      emqttd_mios_plugin_utils:check_auth(PublicKey,binary_to_list(Username),Password,binary_to_list(ClientId))
+      emq_auth_mios_utils:check_auth(PublicKey,binary_to_list(Username),Password,binary_to_list(ClientId))
   end.
 
 description() -> "MiOS Auth Module".

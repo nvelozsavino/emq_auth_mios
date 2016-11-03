@@ -1,6 +1,6 @@
-{application, emqttd_mios_plugin,
+{application, emq_auth_mios,
   [
-    {description, "emqttd Authentication/ACL for MiOS"},
+    {description, "EMQ Authentication/ACL for MiOS"},
     {vsn, "2.0"},
     {modules, []},
     {registered, []},
@@ -9,6 +9,6 @@
       kernel,
       stdlib
     ]},
-    {mod, { emqttd_mios_plugin_app, []}},
+    {mod, {emq_auth_mios_app, []}},
     {env, []}
   ]}.

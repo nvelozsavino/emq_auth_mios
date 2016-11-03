@@ -8,8 +8,8 @@
 %%%-------------------------------------------------------------------
 
 %% @doc emqttd mios plugin application.
--module(emqttd_mios_plugin_app).
--include("emqttd_mios_plugin.hrl").
+-module(emq_auth_mios_app).
+-include("emq_auth_mios.hrl").
 -behaviour(application).
 
 -import(proplists, [get_value/3]).
@@ -27,7 +27,7 @@ get_public_key(Opts)->
       io:format("Signature Verification disabled~n"),
       no_verify;
     true->
-      PublicKey = emqttd_mios_plugin_utils:load_key(PublicKeyFile),
+      PublicKey = emq_auth_mios_utils:load_key(PublicKeyFile),
       PublicKey
   end.
 
@@ -42,20 +42,20 @@ get_superuser_info(Opts)->
 
 start(_StartType, _StartArgs) ->
   gen_conf:init(?APP),
-  {ok, Sup} = emqttd_mios_plugin_sup:start_link(),
+  {ok, Sup} = emq_auth_mios_sup:start_link(),
   {ok,Opts} = gen_conf:value(?APP,mios),
   PublicKey=get_public_key(Opts),
   {SuperUser,SuperPassword}=get_superuser_info(Opts),
 
-  emqttd_mios_plugin:load([]),
-  ok = emqttd_access_control:register_mod(auth, emqttd_mios_plugin_auth,
+  emq_auth_mios:load([]),
+  ok = emqttd_access_control:register_mod(auth, emq_auth_mios_auth,
     {PublicKey, SuperUser, SuperPassword}),
-  ok = emqttd_access_control:register_mod(acl, emqttd_mios_plugin_acl,
+  ok = emqttd_access_control:register_mod(acl, emq_auth_mios_acl,
     SuperUser),
   {ok, Sup}.
 
 stop(_State) ->
-  emqttd_mios_plugin:unload(),
-  emqttd_access_control:unregister_mod(acl, emqttd_mios_plugin_acl),
-  emqttd_access_control:unregister_mod(auth, emqttd_mios_plugin_auth).
+  emq_auth_mios:unload(),
+  emqttd_access_control:unregister_mod(acl, emq_auth_mios_acl),
+  emqttd_access_control:unregister_mod(auth, emq_auth_mios_auth).
 
