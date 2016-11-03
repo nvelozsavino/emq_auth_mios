@@ -12,15 +12,15 @@
 -include("emq_auth_mios.hrl").
 -behaviour(application).
 
--import(proplists, [get_value/3]).
+%%-import(proplists, [get_value/3]).
 %% Application callbacks
 -export([start/2, stop/1]).
 
-get_public_key(Opts)->
+get_public_key()->
 %%  io:format("Options: ~p~n",[Opts]),
-  PublicKeyFile = get_value(certificate, Opts, "/opt/emqtt/etc/pubkey.pem"),
+  PublicKeyFile = application:get_env(?APP, certificate, "/opt/emqtt/etc/pubkey.pem"),
   io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
-  Verify= gen_conf:value(verify,Opts, true),
+  Verify= application:get_env(?APP,verify,true),
 %%  io:format("Verify: ~p~n",[Verify]),
   if
     Verify==false ->
@@ -31,9 +31,9 @@ get_public_key(Opts)->
       PublicKey
   end.
 
-get_superuser_info(Opts)->
-  SuperUser =     get_value(superuser,Opts,no_super_user),
-  SuperPassword = get_value(superpass,Opts,no_super_pass),
+get_superuser_info()->
+  SuperUser =     application:get_env(?APP,superuser,no_super_user),
+  SuperPassword = application:get_env(?APP,superpass,no_super_pass),
   {SuperUser,SuperPassword}.
 
 
@@ -41,11 +41,11 @@ get_superuser_info(Opts)->
 
 
 start(_StartType, _StartArgs) ->
-  gen_conf:init(?APP),
+%%  gen_conf:init(?APP),
   {ok, Sup} = emq_auth_mios_sup:start_link(),
-  {ok,Opts} = gen_conf:value(?APP,mios),
-  PublicKey=get_public_key(Opts),
-  {SuperUser,SuperPassword}=get_superuser_info(Opts),
+%%  {ok,Opts} = gen_conf:value(?APP,mios),
+  PublicKey=get_public_key(),
+  {SuperUser,SuperPassword}=get_superuser_info(),
 
   emq_auth_mios:load([]),
   ok = emqttd_access_control:register_mod(auth, emq_auth_mios_auth,
