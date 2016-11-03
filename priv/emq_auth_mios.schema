@@ -1,0 +1,19 @@
+{mapping, "auth.mios.certificate", "emq_auth_mios.certificate", [
+  {default, "/opt/emqtt/etc/pubkey.pem"},
+  {datatype, string}
+]}.
+
+{mapping, "auth.mios.verify", "emq_auth_mios.verify", [
+  {default, true},
+  {datatype, {enum, [true, false]}}
+]}.
+
+{mapping, "auth.mios.superuser", "emq_auth_mios.superuser", [
+  {default, no_super_user},
+  {datatype, string}
+]}.
+
+{mapping, "auth.mios.superpass", "emq_auth_mios.superpass", [
+  {default, no_super_pass},
+  {datatype, string}
+]}.
