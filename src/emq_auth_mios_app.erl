@@ -20,8 +20,8 @@ get_public_key()->
 %%  io:format("Options: ~p~n",[Opts]),
   {ok,PublicKeyFile} = application:get_env(?APP, certificate),
   io:format("PublicKeyFile: ~p~n",[PublicKeyFile]),
-  Verify= application:get_env(?APP,verify),
-%%  io:format("Verify: ~p~n",[Verify]),
+  {ok,Verify}= application:get_env(?APP,verify),
+  io:format("Verify: ~p~n",[Verify]),
   if
     Verify==false ->
       io:format("Signature Verification disabled~n"),
