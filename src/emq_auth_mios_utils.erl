@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(emq_auth_mios_utils).
 -author("nico").
--include("emqttd_mios_plugin.hrl").
+-include("emq_auth_mios.hrl").
 
 
 -define(EMPTY(Variable), (Variable=:= undefined orelse Variable=:= <<>>)).

@@ -19,7 +19,7 @@ init(Opts) ->
   io:format("init: Init ACL mios plugin~n"),
   {ok, Opts}.
 
-check_acl({#mqtt_client{client_id = ClientId, username = Username}, PubSub, Topic}, SuperUser)
+check_acl({#mqtt_client{client_id = ClientId, username = Username}, _PubSub, _Topic}, _SuperUser)
   when Username==undefined orelse ClientId ==undefined ->
   deny;
 check_acl({#mqtt_client{client_id = ClientId, username = Username}, PubSub, Topic}, SuperUser) ->
