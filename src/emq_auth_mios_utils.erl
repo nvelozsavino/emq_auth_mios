@@ -145,6 +145,35 @@ get_timestamp()->
   Timestamp = Mega*1000000 + Secs,
   Timestamp.
 
+get_PK_Account(IdentityJson) ->
+  AccountChildExist = maps:is_key(<<"PK_AccountChild">>,IdentityJson),
+  if
+    AccountChildExist ->
+      PK_AccountChild=maps:get(<<"PK_AccountChild">>,IdentityJson),
+      PK_AccountChild;
+    true ->
+      PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
+      PK_Account
+  end.
+
+get_PK_Device(IdentityJson) ->
+  PK_DeviceExist = maps:is_key(<<"PK_Device">>,IdentityJson),
+  if
+    PK_DeviceExist ->
+      PK_Device = maps:get(<<"PK_Device">>,IdentityJson),
+      PK_Device;
+    true ->
+      0
+  end.
+
+isDeviceToken(PK_Device) ->
+  case PK_Device of
+    0 ->
+      false;
+    _PK_Device ->
+      true
+  end.
+
 get_token_type(IdentityJson) when ?EMPTY(IdentityJson) ->
   throw(identity_undefined);
 get_token_type(IdentityJson) ->
@@ -154,7 +183,8 @@ get_token_type(IdentityJson) ->
       ExpireTime = maps:get(<<"Expires">>,IdentityJson),
       Now=get_timestamp(),
       Expired = ExpireTime<Now,
-      DeviceExist =maps:is_key(<<"PK_Device">>,IdentityJson),
+      PK_Device = get_PK_Device(IdentityJson),
+      DeviceExist = isDeviceToken(PK_Device),
       UserExist =maps:is_key(<<"PK_User">>,IdentityJson) and
         maps:is_key(<<"PK_Server_Auth">>,IdentityJson) and
         maps:is_key(<<"Seq">>,IdentityJson) and
@@ -168,7 +198,6 @@ get_token_type(IdentityJson) ->
         DeviceExist ->
           io:format("get_token_type: It's a device token~n"),
           PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
-          PK_Device=maps:get(<<"PK_Device">>,IdentityJson),
           {device,PK_Account,PK_Device};
         UserExist ->
           io:format("get_token_type: It's a user token~n"),
@@ -181,7 +210,7 @@ get_token_type(IdentityJson) ->
           "_" ++ to_string(Seq) ++
           "_" ++ to_string(Generated),
 %%          io:format("ClientId ~p~n",[Client_Id]),
-          PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
+          PK_Account=get_PK_Account(IdentityJson),
           Username = binary_to_list(maps:get(<<"Username">>,IdentityJson)),
           PermissionsExist=maps:is_key(<<"PermissionsEnabled">>,IdentityJson),
           if
