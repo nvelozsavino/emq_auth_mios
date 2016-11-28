@@ -186,6 +186,7 @@ get_token_type(IdentityJson) ->
     Valid ->
       ExpireTime = maps:get(<<"Expires">>,IdentityJson),
       Now=get_timestamp(),
+      io:format("Expiration: ~p, now: ~p~n",[ExpireTime,Now]),
       Expired = ExpireTime<Now,
       PK_Device = get_PK_Device(IdentityJson),
       DeviceExist = isDeviceToken(PK_Device),
