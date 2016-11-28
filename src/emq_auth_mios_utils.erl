@@ -147,12 +147,16 @@ get_timestamp()->
 
 get_PK_Account(IdentityJson) ->
   AccountChildExist = maps:is_key(<<"PK_AccountChild">>,IdentityJson),
+  PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
   if
     AccountChildExist ->
-      PK_AccountChild=maps:get(<<"PK_AccountChild">>,IdentityJson),
-      PK_AccountChild;
+      case maps:get(<<"PK_AccountChild">>,IdentityJson) of
+        0 ->
+          PK_Account;
+        PK_AccountChild ->
+          PK_AccountChild
+      end;
     true ->
-      PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
       PK_Account
   end.
 
