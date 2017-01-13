@@ -8,13 +8,13 @@
 %%%-------------------------------------------------------------------
 -module(emq_auth_mios_utils).
 -author("nico").
--include("../include/emq_auth_mios.hrl").
+-include("emq_auth_mios.hrl").
 
 
 -define(EMPTY(Variable), (Variable=:= undefined orelse Variable=:= <<>>)).
 
 %% API
--export([check_auth/4, delete_client/1,check_acl/3,create_tables/0,delete_tables/0, load_key/1, update_all_clients/0, get_time/0]).
+-export([check_auth/4, delete_client/1,check_acl/3,create_tables/0,delete_tables/0, load_key/1, update_all_clients/0]).
 
 get_json(Json) ->
   try
