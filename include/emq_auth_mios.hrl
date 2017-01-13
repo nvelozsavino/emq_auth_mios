@@ -22,4 +22,4 @@
 -define(LOG_LV(Level,Format,Args),
   io:format("~p~t~p~t" ++  ?MODULE_STRING ++ ":"++ ?FUNCTION ++ "~t" ++ Format,[Level,emq_auth_mios_utils:get_time() | Args])).
 -define(LOG_LV(Level,Format),
-  io:format("~p~t~p~t" ++  ?MODULE_STRING ++ ":"++ ?FUNCTION ++ "~t" ++ Format,[Level,emq_auth_mios_utils:get_time())).
+  io:format("~p~t~p~t" ++  ?MODULE_STRING ++ ":"++ ?FUNCTION ++ "~t" ++ Format,[Level,emq_auth_mios_utils:get_time()])).
