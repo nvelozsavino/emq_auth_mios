@@ -18,7 +18,6 @@
 -define(LV_STATUS, "03").
 -define(LV_DEBUG, "04").
 
-
 -define(LOG_LV(Level,Format,Args),
   io:format("~p\t~p\t~p:~p\t" ++ Format,[Level,date_util:getDateTime(),?MODULE_STRING,?FUNCTION | Args])).
 -define(LOG_LV_0(Level,Format),

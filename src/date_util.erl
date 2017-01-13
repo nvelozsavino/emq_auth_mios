@@ -14,7 +14,7 @@
 
 %% API
 
-
+-export([getDateTime/0]).
 getDateTime()->
   Milliseconds = erlang:system_time() div 1000000,
   Seconds = Milliseconds div 1000,
