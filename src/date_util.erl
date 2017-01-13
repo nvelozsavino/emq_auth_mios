@@ -8,17 +8,13 @@
 %%%-------------------------------------------------------------------
 -module(date_util).
 -author("nico").
-
--define(DATETIME(),
-  lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w:~3..0w",getDateTime()))).
-
 %% API
 
 -export([getDateTime/0]).
 getDateTime()->
   Milliseconds = erlang:system_time() div 1000000,
   Seconds = Milliseconds div 1000,
-  Ms = Milliseconds - Seconds,
+  Ms = Milliseconds - (Seconds*1000),
   BaseDate      = calendar:datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}}),
   SecondsTime = BaseDate + Seconds,
   {Date,Time} = calendar:gregorian_seconds_to_datetime(SecondsTime),

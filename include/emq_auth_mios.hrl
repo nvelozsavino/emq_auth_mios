@@ -13,14 +13,18 @@
 -define(CLIENTS_DATABASE, mios_clients).
 -define(TOPICS_DATABASE, mios_topics).
 -define(FUNCTION, element(2, element(2, process_info(self(), current_function)))).
--define(LV_ERROR, "01").
--define(LV_WARNING, "02").
--define(LV_STATUS, "03").
--define(LV_DEBUG, "04").
+-define(LV_ERROR, 1).
+-define(LV_WARNING, 2).
+-define(LV_STATUS, 3).
+-define(LV_DEBUG, 4).
+
+-define(DATETIME,
+  lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w:~3..0w",date_util:getDateTime()))).
+
 
 -define(LOG_LV(Level,Format,Args),
-  io:format("~p\t~p\t~p:~p\t" ++ Format,[Level,date_util:getDateTime(),?MODULE_STRING,?FUNCTION | Args])).
+  io:format("~2..0w ~p  ~p:~p  " ++ Format,[Level,?DATETIME,?MODULE_STRING,?FUNCTION | Args])).
 -define(LOG_LV_0(Level,Format),
-  io:format("~p\t~p\t~p:~p\t" ++ Format,[Level,date_util:getDateTime(),?MODULE_STRING,?FUNCTION])).
+  io:format("~2..0w ~p  ~p:~p  " ++ Format,[Level,?DATETIME,?MODULE_STRING,?FUNCTION])).
 
 
