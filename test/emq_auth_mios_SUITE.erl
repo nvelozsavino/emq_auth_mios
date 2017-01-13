@@ -4,7 +4,7 @@
 -compile(export_all).
 
 -include_lib("emqttd/include/emqttd.hrl").
-
+-include("emq_auth_mios.hrl").
 
 all() -> [{group, emq_auth_mios}].
 
@@ -12,7 +12,7 @@ groups() -> [{emq_auth_mios,[sequence],[check_auth,check_acl]}].
 
 
 init_per_suite(Config) ->
-  ?LOG_LV(?LV_STATUS,("Init per suite~n"),
+  ?LOG_LV_0(?LV_STATUS,("Init per suite~n"),
   DataDir = proplists:get_value(data_dir, Config),
   application:start(lager),
   application:set_env(emqttd, conf, filename:join([DataDir, "emqttd.conf"])),

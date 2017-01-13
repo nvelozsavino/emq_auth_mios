@@ -24,7 +24,7 @@ get_public_key()->
   ?LOG_LV(?LV_DEBUG,("Verify: ~p~n",[Verify]),
   if
     Verify==false ->
-      ?LOG_LV(?LV_WARNING,("Signature Verification disabled~n"),
+      ?LOG_LV_0(?LV_WARNING,("Signature Verification disabled~n"),
       no_verify;
     true->
       PublicKey = emq_auth_mios_utils:load_key(PublicKeyFile),

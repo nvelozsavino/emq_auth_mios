@@ -17,7 +17,7 @@
 -export([init/1, check_acl/2, reload_acl/1, description/0]).
 
 init(Opts) ->
-  ?LOG_LV(?LV_STATUS,"init: Init ACL mios plugin~n"),
+  ?LOG_LV_0(?LV_STATUS,"init: Init ACL mios plugin~n"),
   {ok, Opts}.
 
 check_acl({#mqtt_client{client_id = ClientId, username = Username}, _PubSub, _Topic}, _SuperUser)

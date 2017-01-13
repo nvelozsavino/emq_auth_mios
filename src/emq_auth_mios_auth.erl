@@ -18,7 +18,7 @@
 -export([init/1, check/3, description/0]).
 
 init(Opts) ->
-  ?LOG_LV(?LV_STATUS,("init: Init Auth mios plugin~n"),
+  ?LOG_LV_0(?LV_STATUS,("init: Init Auth mios plugin~n"),
   {ok,Opts}.
 
 check(_Client,Username,Password) when Username==undefined orelse Password==undefined ->

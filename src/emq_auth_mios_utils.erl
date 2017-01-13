@@ -198,14 +198,14 @@ get_token_type(IdentityJson) ->
 
       if
         Expired->
-          ?LOG_LV(?LV_STATUS,("get_token_type: Token expired ~p seconds ago~n",[ExpireTime-Now]),
+          ?LOG_LV(?LV_WARNING,("get_token_type: Token expired ~p seconds ago~n",[ExpireTime-Now]),
           expired;
         DeviceExist ->
-          ?LOG_LV(?LV_STATUS,("get_token_type: It's a device token~n"),
+          ?LOG_LV_0(?LV_DEBUG,("get_token_type: It's a device token~n"),
           PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
           {device,PK_Account,PK_Device};
         UserExist ->
-          ?LOG_LV(?LV_STATUS,("get_token_type: It's a user token~n"),
+          ?LOG_LV_0(?LV_DEBUG,("get_token_type: It's a user token~n"),
           PK_User=maps:get(<<"PK_User">>,IdentityJson),
           PK_Server_Auth=maps:get(<<"PK_Server_Auth">>,IdentityJson),
           Seq=maps:get(<<"Seq">>,IdentityJson),
@@ -284,18 +284,18 @@ do_auth(PublicKey,ClientId, Username,Password)->
                   {error,not_authorized}
               end;
             expired ->
-              ?LOG_LV(?LV_WARNING,("Token expired~n"),
+              ?LOG_LV_0(?LV_WARNING,("Token expired~n"),
               {error,expired_token};
             _Else ->
               ?LOG_LV(?LV_ERROR,("Unrecognized TokenType ~p~n",[_Else]),
               {error,unrecongized_token}
           end;
         true ->
-          ?LOG_LV(?LV_ERROR,("Signature Failed ~n"),
+          ?LOG_LV_0(?LV_ERROR,("Signature Failed ~n"),
           {error,signature_failed}
       end;
     false ->
-      ?LOG_LV(?LV_ERROR,("Token unrecognized ~n"),
+      ?LOG_LV_0(?LV_ERROR,("Token unrecognized ~n"),
       {error,token_unrecognized}
   end.
 
