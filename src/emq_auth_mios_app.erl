@@ -17,14 +17,14 @@
 -export([start/2, stop/1]).
 
 get_public_key()->
-%%  ?LOG_LV(?LV_STATUS,("Options: ~p~n",[Opts]),
+%%  ?LOG_LV(?LV_STATUS,"Options: ~p~n",[Opts]),
   {ok,PublicKeyFile} = application:get_env(?APP, certificate),
-  ?LOG_LV(?LV_DEBUG,("PublicKeyFile: ~p~n",[PublicKeyFile]),
+  ?LOG_LV(?LV_DEBUG,"PublicKeyFile: ~p~n",[PublicKeyFile]),
   {ok,Verify}= application:get_env(?APP,verify),
-  ?LOG_LV(?LV_DEBUG,("Verify: ~p~n",[Verify]),
+  ?LOG_LV(?LV_DEBUG,"Verify: ~p~n",[Verify]),
   if
     Verify==false ->
-      ?LOG_LV_0(?LV_WARNING,("Signature Verification disabled~n"),
+      ?LOG_LV(?LV_WARNING,"Signature Verification disabled~n"),
       no_verify;
     true->
       PublicKey = emq_auth_mios_utils:load_key(PublicKeyFile),
