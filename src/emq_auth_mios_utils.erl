@@ -198,14 +198,14 @@ get_token_type(IdentityJson) ->
 
       if
         Expired->
-          ?LOG_LV(?LV_WARNING,"get_token_type: Token expired ~p seconds ago~n",[ExpireTime-Now]),
+          ?LOG_LV(?LV_WARNING,"Token expired ~p seconds ago~n",[ExpireTime-Now]),
           expired;
         DeviceExist ->
-          ?LOG_LV_0(?LV_DEBUG,"get_token_type: It's a device token~n"),
+          ?LOG_LV_0(?LV_DEBUG,"It's a device token~n"),
           PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
           {device,PK_Account,PK_Device};
         UserExist ->
-          ?LOG_LV_0(?LV_DEBUG,"get_token_type: It's a user token~n"),
+          ?LOG_LV_0(?LV_DEBUG,"It's a user token~n"),
           PK_User=maps:get(<<"PK_User">>,IdentityJson),
           PK_Server_Auth=maps:get(<<"PK_Server_Auth">>,IdentityJson),
           Seq=maps:get(<<"Seq">>,IdentityJson),
@@ -263,7 +263,7 @@ do_auth(PublicKey,ClientId, Username,Password)->
                 Authorized ->
                   register_user(PK_Account,ClientId,WhiteList),
                   update_clients(PK_Account),
-                  ?LOG_LV(?LV_STATUS,"check_auth: Allowed user ~p~n-----------------------~n",[ClientId]),
+                  ?LOG_LV(?LV_STATUS,"Allowed user ~p~n-----------------------~n",[ClientId]),
                   ok;
                 true->
                   {error,not_authorized}
@@ -278,7 +278,7 @@ do_auth(PublicKey,ClientId, Username,Password)->
                 Authorized ->
                   register_device(PK_Account,PK_Device,ClientId),
                   update_clients(PK_Account),
-                  ?LOG_LV(?LV_STATUS,"check_auth: Allowed device ~p~n-----------------------~n",[PK_Device]),
+                  ?LOG_LV(?LV_STATUS,"Allowed device ~p~n-----------------------~n",[PK_Device]),
                   ok;
                 true->
                   {error,not_authorized}
@@ -324,13 +324,13 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
 
 
 register_device(PK_Account,PK_Device,ClientId) ->
-  ?LOG_LV(?LV_STATUS,"register_device: Device ~p inserted~n",[PK_Device]),
+  ?LOG_LV(?LV_STATUS,"Device ~p inserted~n",[PK_Device]),
   ets:insert(?DEVICES_DATABASE,{PK_Account,PK_Device,ClientId}),
   ets:insert(?CLIENTS_DATABASE,{ClientId,device,{PK_Account,PK_Device}}).
 
 
 register_user(PK_Account,ClientId,WhiteList) ->
-  ?LOG_LV(?LV_STATUS,"register_user: User ~p inserted~n",[ClientId]),
+  ?LOG_LV(?LV_STATUS,"User ~p inserted~n",[ClientId]),
   ets:insert(?USERS_DATABASE,{PK_Account,ClientId,WhiteList}),
   ets:insert(?CLIENTS_DATABASE,{ClientId,user,{PK_Account,ClientId}}).
 
@@ -343,14 +343,14 @@ ets_lookup(Table,Key) ->
   end.
 
 update_clients(PK_Account) ->
-  ?LOG_LV(?LV_STATUS,"update_clients: Updating clients on Account ~p~n",[PK_Account]),
+  ?LOG_LV(?LV_STATUS,"Updating clients on Account ~p~n",[PK_Account]),
   Devices = ets_lookup(?DEVICES_DATABASE,PK_Account),
-  ?LOG_LV(?LV_STATUS,"update_clients: Devices: ~p~n",[Devices]),
+  ?LOG_LV(?LV_STATUS,"Devices: ~p~n",[Devices]),
   Users = ets_lookup(?USERS_DATABASE,PK_Account),
-  ?LOG_LV(?LV_STATUS,"update_clients: Users: ~p~n",[Users]),
+  ?LOG_LV(?LV_STATUS,"Users: ~p~n",[Users]),
   update_users_topics(Users,Devices),
   update_device_topics(Devices,Users),
-  ?LOG_LV(?LV_STATUS,"update_clients: Done Updating clients on Account ~p~n",[PK_Account]).
+  ?LOG_LV(?LV_STATUS,"Done Updating clients on Account ~p~n",[PK_Account]).
 
 list_contains(Element,[H|L])->
   Exist = (Element == H),
@@ -393,7 +393,7 @@ get_user_topics(ClientId,[],Topics,_)->
   Pub=[ClientId++"/connected"],
   Sub=["+/connected"],
   NewTopics=insert_topics(Sub,Pub,Topics),
-  ?LOG_LV(?LV_DEBUG,"get_user_topics: ~p Ending with topics: ~p~n",[ClientId,NewTopics]),
+  ?LOG_LV(?LV_DEBUG,"~p Ending with topics: ~p~n",[ClientId,NewTopics]),
   NewTopics.
 
 
@@ -424,7 +424,7 @@ get_device_topics(PK_Device,[],Topics)->
       to_string(PK_Device)++"/source",
       to_string(PK_Device)++"/+/in"],
   NewTopics= insert_topics(Sub,Pub,Topics),
-  ?LOG_LV(?LV_DEBUG,"get_device_topics: ~p Ending with topics: ~p~n",[PK_Device,NewTopics]),
+  ?LOG_LV(?LV_DEBUG,"~p Ending with topics: ~p~n",[PK_Device,NewTopics]),
   NewTopics.
 
 
@@ -434,7 +434,7 @@ update_users_topics([H|L],DeviceList)->
   NewTopics=get_user_topics(ClientId,DeviceList,WhiteList),
 %%  create_table(topics,set),
   ets:insert(?TOPICS_DATABASE,{ClientId,NewTopics}),
-  ?LOG_LV(?LV_DEBUG,"update_users_topics: Topics for user ~p are: ~p~n",[ClientId,NewTopics]),
+  ?LOG_LV(?LV_DEBUG,"Topics for user ~p are: ~p~n",[ClientId,NewTopics]),
   update_users_topics(L,DeviceList);
 update_users_topics([],_)-> none.
 
@@ -443,7 +443,7 @@ update_device_topics([H|L],UserList)->
   NewTopics=get_device_topics(PK_Device,UserList),
 %%  create_table(topics,set),
   ets:insert(?TOPICS_DATABASE,{ClientId,NewTopics}),
-  ?LOG_LV(?LV_DEBUG,"update_device_topics: Topics for device ~p are: ~p~n",[PK_Device,NewTopics]),
+  ?LOG_LV(?LV_DEBUG,"Topics for device ~p are: ~p~n",[PK_Device,NewTopics]),
   update_device_topics(L,UserList);
 update_device_topics([],_)-> none.
 
@@ -481,16 +481,16 @@ delete_client(Client) ->
             user ->
               {PK_Account,ClientId}=Data,
               delete_user(PK_Account,ClientId),
-              ?LOG_LV(?LV_STATUS,"delete_client: Deleting user: ~p~n",[ClientId]),
+              ?LOG_LV(?LV_STATUS,"Deleting user: ~p~n",[ClientId]),
               update_clients(PK_Account);
             device->
               {PK_Account,PK_Device}=Data,
               delete_device(PK_Account,PK_Device),
-              ?LOG_LV(?LV_STATUS,"delete_client: Deleting device: ~p~n",[PK_Device]),
+              ?LOG_LV(?LV_STATUS,"Deleting device: ~p~n",[PK_Device]),
               update_clients(PK_Account)
           end;
         true->
-          ?LOG_LV(?LV_ERROR,"delete_client: Client: ~p does not exist~n",[Client]),
+          ?LOG_LV(?LV_ERROR,"Client: ~p does not exist~n",[Client]),
           ok
       end
   end.

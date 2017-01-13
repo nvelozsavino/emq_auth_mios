@@ -26,7 +26,7 @@ load(Env) ->
 
 
 on_client_disconnected(Reason, #mqtt_client{client_id = ClientId}, _Env) ->
-  ?LOG_LV(?LV_WARNING,"on_client_disconnected: client ~s disconnected, reason: ~w~n", [ClientId, Reason]),
+  ?LOG_LV(?LV_WARNING,"client ~s disconnected, reason: ~w~n", [ClientId, Reason]),
   emq_auth_mios_utils:delete_client(binary_to_list(ClientId)),
   ok.
 
