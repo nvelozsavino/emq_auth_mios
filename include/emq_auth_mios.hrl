@@ -23,8 +23,8 @@
 
 
 -define(LOG_LV(Level,Format,Args),
-  io:format("~2..0w ~p  ~p:~p  " ++ Format,[Level,??DATETIME,??MODULE_STRING,?FUNCTION | Args])).
+  io:format("~2..0w "++ ?DATETIME ++ " " ++ ?MODULE_STRING ++ ":~p  " ++ Format,[Level,?FUNCTION | Args])).
 -define(LOG_LV_0(Level,Format),
-  io:format("~2..0w ~p  ~p:~p  " ++ Format,[Level,??DATETIME,??MODULE_STRING,?FUNCTION])).
+  io:format("~2..0w "++ ?DATETIME ++ " " ++ ?MODULE_STRING ++ ":~p  " ++ Format,[Level,?FUNCTION])).
 
 
