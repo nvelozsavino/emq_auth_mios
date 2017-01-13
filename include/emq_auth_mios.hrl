@@ -12,7 +12,6 @@
 -define(DEVICES_DATABASE, mios_devices).
 -define(CLIENTS_DATABASE, mios_clients).
 -define(TOPICS_DATABASE, mios_topics).
--define(DEC(X), $0 + X div 10, $0 + X rem 10).
 -define(FUNCTION, element(2, element(2, process_info(self(), current_function)))).
 -define(LV_ERROR, "01").
 -define(LV_WARNING, "02").
@@ -21,11 +20,8 @@
 
 
 -define(LOG_LV(Level,Format,Args),
-  io:format("~p\t~p\t~p:~p\t" ++ Format,[Level,get_time(),?MODULE_STRING,?FUNCTION,emq_auth_mios_utils:get_time() | Args])).
+  io:format("~p\t~p\t~p:~p\t" ++ Format,[Level,date_util:getDateTime(),?MODULE_STRING,?FUNCTION | Args])).
 -define(LOG_LV_0(Level,Format),
-  io:format("~p\t~p\t~p:~p\t" ++ Format,[Level,get_time(),?MODULE_STRING,?FUNCTION,emq_auth_mios_utils:get_time()])).
+  io:format("~p\t~p\t~p:~p\t" ++ Format,[Level,date_util:getDateTime(),?MODULE_STRING,?FUNCTION])).
 
 
-get_time() ->
-  {H, M, S} = time(),
-  [?DEC(H), $:, ?DEC(M), $:, ?DEC(S)].
