@@ -12,12 +12,12 @@ groups() -> [{emq_auth_mios,[sequence],[check_auth,check_acl]}].
 
 
 init_per_suite(Config) ->
-  io:format("Init per suite~n"),
+  ?LOG_LV(?LV_STATUS,("Init per suite~n"),
   DataDir = proplists:get_value(data_dir, Config),
   application:start(lager),
   application:set_env(emqttd, conf, filename:join([DataDir, "emqttd.conf"])),
   application:ensure_all_started(emqttd),
-  io:format("DataDir: ~p~n",[DataDir]),
+  ?LOG_LV(?LV_STATUS,("DataDir: ~p~n",[DataDir]),
   application:set_env(emq_auth_mios, conf, filename:join([DataDir, "emq_auth_mios.conf"])),
   application:ensure_all_started(emq_auth_mios),
   Config.

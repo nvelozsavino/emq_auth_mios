@@ -8,13 +8,13 @@
 %%%-------------------------------------------------------------------
 -module(emq_auth_mios_utils).
 -author("nico").
--include("emq_auth_mios.hrl").
+-include("../include/emq_auth_mios.hrl").
 
 
 -define(EMPTY(Variable), (Variable=:= undefined orelse Variable=:= <<>>)).
 
 %% API
--export([check_auth/4, delete_client/1,check_acl/3,create_tables/0,delete_tables/0, load_key/1, update_all_clients/0]).
+-export([check_auth/4, delete_client/1,check_acl/3,create_tables/0,delete_tables/0, load_key/1, update_all_clients/0, get_time/0]).
 
 get_json(Json) ->
   try
@@ -53,7 +53,7 @@ intstr_list_to_list([H|T],List) ->
   {Number,_Rest}=string:to_integer(H),
   case Number of
     error ->
-      io:format("error, no number ~p~n",[H]),
+      ?LOG_LV(?LV_ERROR,("error, no number ~p~n",[H]),
       error;
     Num->
       intstr_list_to_list(T,[Num]++List)
@@ -69,31 +69,31 @@ bin_to_list(Binary)->
   end.
 
 process_white_list(WhiteListString)->
-%%  io:format("No process_white_list~p~n",[WhiteListString]),
+%%  ?LOG_LV(?LV_STATUS,("No process_white_list~p~n",[WhiteListString]),
   IsString=io_lib:printable_list(WhiteListString),
   if
     IsString->
-%%      io:format("Is String~n"),
+%%      ?LOG_LV(?LV_STATUS,("Is String~n"),
       {Match,Matches}=re:run(WhiteListString,"^\\[(.*)\\]$"),
-%%      io:format("Match found? ~p,~p~n",[Match,Matches]),
+%%      ?LOG_LV(?LV_STATUS,("Match found? ~p,~p~n",[Match,Matches]),
       case Match of
         match ->
           MatchesLen=length(Matches),
           if
             MatchesLen==2 ->
-%%              io:format("Matches length =~p~n",[MatchesLen]),
+%%              ?LOG_LV(?LV_STATUS,("Matches length =~p~n",[MatchesLen]),
               Indexes=tuple_to_list(lists:nth(2,Matches)),
-%%              io:format("Indexes =~p~n",[Indexes]),
+%%              ?LOG_LV(?LV_STATUS,("Indexes =~p~n",[Indexes]),
               Start=lists:nth(1,Indexes)+1,
-%%              io:format("Start =~p~n",[Start]),
+%%              ?LOG_LV(?LV_STATUS,("Start =~p~n",[Start]),
               End=lists:nth(2,Indexes),
-%%              io:format("End =~p~n",[End]),
+%%              ?LOG_LV(?LV_STATUS,("End =~p~n",[End]),
               MatchesString=string:substr(WhiteListString,Start,End),
-%%              io:format("Match String=~p~n",[MatchesString]),
+%%              ?LOG_LV(?LV_STATUS,("Match String=~p~n",[MatchesString]),
               DeviceLists=string:tokens(MatchesString,","),
-%%              io:format("Device List String=~p~n",[DeviceLists]),
+%%              ?LOG_LV(?LV_STATUS,("Device List String=~p~n",[DeviceLists]),
               List=intstr_list_to_list(DeviceLists),
-%%              io:format("Device List=~p~n",[List]),
+%%              ?LOG_LV(?LV_STATUS,("Device List=~p~n",[List]),
               case List of
                 error -> all;
                 [] -> all;
@@ -107,30 +107,30 @@ process_white_list(WhiteListString)->
 
 get_white_list([])-> all;
 get_white_list([H|T]) ->
-%%  io:format("get_white_list~p~n",[H]),
+%%  ?LOG_LV(?LV_STATUS,("get_white_list~p~n",[H]),
   if
     H==41 ->
-%%      io:format("Is number~n"),
+%%      ?LOG_LV(?LV_STATUS,("Is number~n"),
       all;
     is_map(H) ->
       PK_Exist=maps:is_key(<<"PK">>,H),
-%%      io:format("Is Map~n"),
+%%      ?LOG_LV(?LV_STATUS,("Is Map~n"),
       if
         PK_Exist ->
           PK = maps:get(<<"PK">>,H),
-%%          io:format("PK=~p~n",[PK]),
+%%          ?LOG_LV(?LV_STATUS,("PK=~p~n",[PK]),
           PK_Perm41=(PK==41),
           if
             PK_Perm41 ->
-%%              io:format("Is perm 41~n"),
+%%              ?LOG_LV(?LV_STATUS,("Is perm 41~n"),
               ArgumentExist=maps:is_key(<<"Arguments">>,H),
               if
                 ArgumentExist->
                   Arguments= maps:get(<<"Arguments">>,H),
-%%                  io:format("Arguments~p~n",[Arguments]),
+%%                  ?LOG_LV(?LV_STATUS,("Arguments~p~n",[Arguments]),
                   process_white_list(bin_to_list(Arguments));
                 true ->
-%%                  io:format("No Arguments~n"),
+%%                  ?LOG_LV(?LV_STATUS,("No Arguments~n"),
                   all
               end;
             true -> get_white_list(T)
@@ -186,7 +186,7 @@ get_token_type(IdentityJson) ->
     Valid ->
       ExpireTime = maps:get(<<"Expires">>,IdentityJson),
       Now=get_timestamp(),
-      io:format("Expiration: ~p, now: ~p~n",[ExpireTime,Now]),
+      ?LOG_LV(?LV_STATUS,("Expiration: ~p, now: ~p~n",[ExpireTime,Now]),
       Expired = ExpireTime<Now,
       PK_Device = get_PK_Device(IdentityJson),
       DeviceExist = isDeviceToken(PK_Device),
@@ -198,14 +198,14 @@ get_token_type(IdentityJson) ->
 
       if
         Expired->
-          io:format("get_token_type: Token expired ~p seconds ago~n",[ExpireTime-Now]),
+          ?LOG_LV(?LV_STATUS,("get_token_type: Token expired ~p seconds ago~n",[ExpireTime-Now]),
           expired;
         DeviceExist ->
-          io:format("get_token_type: It's a device token~n"),
+          ?LOG_LV(?LV_STATUS,("get_token_type: It's a device token~n"),
           PK_Account=maps:get(<<"PK_Account">>,IdentityJson),
           {device,PK_Account,PK_Device};
         UserExist ->
-          io:format("get_token_type: It's a user token~n"),
+          ?LOG_LV(?LV_STATUS,("get_token_type: It's a user token~n"),
           PK_User=maps:get(<<"PK_User">>,IdentityJson),
           PK_Server_Auth=maps:get(<<"PK_Server_Auth">>,IdentityJson),
           Seq=maps:get(<<"Seq">>,IdentityJson),
@@ -214,16 +214,16 @@ get_token_type(IdentityJson) ->
           "_" ++ to_string(PK_Server_Auth) ++
           "_" ++ to_string(Seq) ++
           "_" ++ to_string(Generated),
-%%          io:format("ClientId ~p~n",[Client_Id]),
+%%          ?LOG_LV(?LV_STATUS,("ClientId ~p~n",[Client_Id]),
           PK_Account=get_PK_Account(IdentityJson),
           Username = binary_to_list(maps:get(<<"Username">>,IdentityJson)),
           PermissionsExist=maps:is_key(<<"PermissionsEnabled">>,IdentityJson),
           if
             PermissionsExist ->
               Permissions = maps:get(<<"PermissionsEnabled">>,IdentityJson),
-%%              io:format("Permissions exist: ~p~n",[Permissions]),
+%%              ?LOG_LV(?LV_STATUS,("Permissions exist: ~p~n",[Permissions]),
               WhiteList=get_white_list(Permissions),
-              io:format("WhiteList: ~p~n",[WhiteList]),
+              ?LOG_LV(?LV_STATUS,("WhiteList: ~p~n",[WhiteList]),
               {user, PK_Account,Client_Id,Username,WhiteList};
             true->
               {user, PK_Account,Client_Id,Username,all}
@@ -257,13 +257,13 @@ do_auth(PublicKey,ClientId, Username,Password)->
           case get_token_type(IdentityJson) of
             {user,PK_Account,TokenClientId,TokenUsername,WhiteList} ->
               Authorized = (Username == TokenUsername) and (TokenClientId==ClientId),
-              io:format("Required Username: ~p  Username: ~p~n",[TokenUsername, Username]),
-              io:format("Required ClientId: ~p  ClientId: ~p~n",[TokenClientId,ClientId]),
+              ?LOG_LV(?LV_WARNING,("Required Username: ~p  Username: ~p~n",[TokenUsername, Username]),
+              ?LOG_LV(?LV_WARNING,("Required ClientId: ~p  ClientId: ~p~n",[TokenClientId,ClientId]),
               if
                 Authorized ->
                   register_user(PK_Account,ClientId,WhiteList),
                   update_clients(PK_Account),
-                  io:format("check_auth: Allowed user ~p~n-----------------------~n",[ClientId]),
+                  ?LOG_LV(?LV_STATUS,("check_auth: Allowed user ~p~n-----------------------~n",[ClientId]),
                   ok;
                 true->
                   {error,not_authorized}
@@ -272,30 +272,30 @@ do_auth(PublicKey,ClientId, Username,Password)->
               PK_DeviceStr=to_string(PK_Device),
               CleanedClientId= clean_device_client_id(ClientId),
               Authorized = (Username == PK_DeviceStr) and (PK_DeviceStr==CleanedClientId),
-              io:format("Required Username: ~p  Username: ~p~n",[PK_DeviceStr, Username]),
-              io:format("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,CleanedClientId]),
+              ?LOG_LV(?LV_DEBUG,("Required Username: ~p  Username: ~p~n",[PK_DeviceStr, Username]),
+              ?LOG_LV(?LV_DEBUG,("Required ClientId: ~p  ClientId: ~p~n",[PK_DeviceStr,CleanedClientId]),
               if
                 Authorized ->
                   register_device(PK_Account,PK_Device,ClientId),
                   update_clients(PK_Account),
-                  io:format("check_auth: Allowed device ~p~n-----------------------~n",[PK_Device]),
+                  ?LOG_LV(?LV_STATUS,("check_auth: Allowed device ~p~n-----------------------~n",[PK_Device]),
                   ok;
                 true->
                   {error,not_authorized}
               end;
             expired ->
-              io:format("Token expired~n"),
+              ?LOG_LV(?LV_WARNING,("Token expired~n"),
               {error,expired_token};
             _Else ->
-              io:format("Unrecognized TokenType ~p~n",[_Else]),
+              ?LOG_LV(?LV_ERROR,("Unrecognized TokenType ~p~n",[_Else]),
               {error,unrecongized_token}
           end;
         true ->
-          io:format("Signature Failed ~n"),
+          ?LOG_LV(?LV_ERROR,("Signature Failed ~n"),
           {error,signature_failed}
       end;
     false ->
-      io:format("Token unrecognized ~n"),
+      ?LOG_LV(?LV_ERROR,("Token unrecognized ~n"),
       {error,token_unrecognized}
   end.
 
@@ -309,7 +309,7 @@ check_auth(_,_,Password,_) when ?EMPTY(Password)->
 check_auth(_,_,_,ClientId) when ?EMPTY(ClientId)->
   {error,client_id_undefined};
 check_auth(PublicKey,UserName,Password,ClientId) ->
-%%  io:format("ClientID: ~p~nUsername: ~p~nPassword: ~p~n",[ClientId,UserName,Password]),
+%%  ?LOG_LV(?LV_STATUS,("ClientID: ~p~nUsername: ~p~nPassword: ~p~n",[ClientId,UserName,Password]),
   try
     JsonToken = get_json(Password),
     if
@@ -318,19 +318,19 @@ check_auth(PublicKey,UserName,Password,ClientId) ->
     end
   catch
     throw:Error ->
-      io:format("Throw ~p~n",[Error]),
+      ?LOG_LV(?LV_STATUS,("Throw ~p~n",[Error]),
       {error,Error}
   end.
 
 
 register_device(PK_Account,PK_Device,ClientId) ->
-  io:format("register_device: Device ~p inserted~n",[PK_Device]),
+  ?LOG_LV(?LV_STATUS,("register_device: Device ~p inserted~n",[PK_Device]),
   ets:insert(?DEVICES_DATABASE,{PK_Account,PK_Device,ClientId}),
   ets:insert(?CLIENTS_DATABASE,{ClientId,device,{PK_Account,PK_Device}}).
 
 
 register_user(PK_Account,ClientId,WhiteList) ->
-  io:format("register_user: User ~p inserted~n",[ClientId]),
+  ?LOG_LV(?LV_STATUS,("register_user: User ~p inserted~n",[ClientId]),
   ets:insert(?USERS_DATABASE,{PK_Account,ClientId,WhiteList}),
   ets:insert(?CLIENTS_DATABASE,{ClientId,user,{PK_Account,ClientId}}).
 
@@ -343,14 +343,14 @@ ets_lookup(Table,Key) ->
   end.
 
 update_clients(PK_Account) ->
-  io:format("update_clients: Updating clients on Account ~p~n",[PK_Account]),
+  ?LOG_LV(?LV_STATUS,("update_clients: Updating clients on Account ~p~n",[PK_Account]),
   Devices = ets_lookup(?DEVICES_DATABASE,PK_Account),
-  io:format("update_clients: Devices: ~p~n",[Devices]),
+  ?LOG_LV(?LV_STATUS,("update_clients: Devices: ~p~n",[Devices]),
   Users = ets_lookup(?USERS_DATABASE,PK_Account),
-  io:format("update_clients: Users: ~p~n",[Users]),
+  ?LOG_LV(?LV_STATUS,("update_clients: Users: ~p~n",[Users]),
   update_users_topics(Users,Devices),
   update_device_topics(Devices,Users),
-  io:format("update_clients: Done Updating clients on Account ~p~n",[PK_Account]).
+  ?LOG_LV(?LV_STATUS,("update_clients: Done Updating clients on Account ~p~n",[PK_Account]).
 
 list_contains(Element,[H|L])->
   Exist = (Element == H),
@@ -393,7 +393,7 @@ get_user_topics(ClientId,[],Topics,_)->
   Pub=[ClientId++"/connected"],
   Sub=["+/connected"],
   NewTopics=insert_topics(Sub,Pub,Topics),
-  io:format("get_user_topics: ~p Ending with topics: ~p~n",[ClientId,NewTopics]),
+  ?LOG_LV(?LV_DEBUG,("get_user_topics: ~p Ending with topics: ~p~n",[ClientId,NewTopics]),
   NewTopics.
 
 
@@ -410,7 +410,7 @@ get_device_topics(PK_Device,[H|T],Topics)->
           to_string(PK_Device)++"/"++ClientId++"/ud"],
       NewSubTopics = [
           to_string(PK_Device)++"/"++ClientId++"/alive"],
-%%      io:format("get_device_topics: Topics: ~p~n",[Topics]),
+%%      ?LOG_LV(?LV_STATUS,("get_device_topics: Topics: ~p~n",[Topics]),
       NewTopics=insert_topics(NewSubTopics,NewPubTopics,Topics),
       get_device_topics(PK_Device,T,NewTopics);
     true ->
@@ -424,7 +424,7 @@ get_device_topics(PK_Device,[],Topics)->
       to_string(PK_Device)++"/source",
       to_string(PK_Device)++"/+/in"],
   NewTopics= insert_topics(Sub,Pub,Topics),
-  io:format("get_device_topics: ~p Ending with topics: ~p~n",[PK_Device,NewTopics]),
+  ?LOG_LV(?LV_DEBUG,("get_device_topics: ~p Ending with topics: ~p~n",[PK_Device,NewTopics]),
   NewTopics.
 
 
@@ -434,7 +434,7 @@ update_users_topics([H|L],DeviceList)->
   NewTopics=get_user_topics(ClientId,DeviceList,WhiteList),
 %%  create_table(topics,set),
   ets:insert(?TOPICS_DATABASE,{ClientId,NewTopics}),
-  io:format("update_users_topics: Topics for user ~p are: ~p~n",[ClientId,NewTopics]),
+  ?LOG_LV(?LV_DEBUG,("update_users_topics: Topics for user ~p are: ~p~n",[ClientId,NewTopics]),
   update_users_topics(L,DeviceList);
 update_users_topics([],_)-> none.
 
@@ -443,7 +443,7 @@ update_device_topics([H|L],UserList)->
   NewTopics=get_device_topics(PK_Device,UserList),
 %%  create_table(topics,set),
   ets:insert(?TOPICS_DATABASE,{ClientId,NewTopics}),
-  io:format("update_device_topics: Topics for device ~p are: ~p~n",[PK_Device,NewTopics]),
+  ?LOG_LV(?LV_DEBUG,("update_device_topics: Topics for device ~p are: ~p~n",[PK_Device,NewTopics]),
   update_device_topics(L,UserList);
 update_device_topics([],_)-> none.
 
@@ -481,16 +481,16 @@ delete_client(Client) ->
             user ->
               {PK_Account,ClientId}=Data,
               delete_user(PK_Account,ClientId),
-              io:format("delete_client: Deleting user: ~p~n",[ClientId]),
+              ?LOG_LV(?LV_STATUS,("delete_client: Deleting user: ~p~n",[ClientId]),
               update_clients(PK_Account);
             device->
               {PK_Account,PK_Device}=Data,
               delete_device(PK_Account,PK_Device),
-              io:format("delete_client: Deleting device: ~p~n",[PK_Device]),
+              ?LOG_LV(?LV_STATUS,("delete_client: Deleting device: ~p~n",[PK_Device]),
               update_clients(PK_Account)
           end;
         true->
-          io:format("delete_client: Client: ~p does not exist~n",[Client]),
+          ?LOG_LV(?LV_ERROR,("delete_client: Client: ~p does not exist~n",[Client]),
           ok
       end
   end.
@@ -570,7 +570,7 @@ check_acl(ClientId,PubSub,Topic)->
           if
             Match -> true;
             true ->
-              io:format("ACL Denied ClientId: ~p, trying to publish to topic: ~p but is allowed only to: ~p~n",[ClientId,Topic,Pub]),
+              ?LOG_LV(?LV_WARNING,("ACL Denied ClientId: ~p, trying to publish to topic: ~p but is allowed only to: ~p~n",[ClientId,Topic,Pub]),
               false
           end;
         subscribe->
@@ -578,11 +578,11 @@ check_acl(ClientId,PubSub,Topic)->
           if
             Match -> true;
             true ->
-              io:format("ACL Denied ClientId: ~p, trying to subscribe to topic: ~p but is allowed only to: ~p~n",[ClientId,Topic,Sub]),
+              ?LOG_LV(?LV_WARNING,("ACL Denied ClientId: ~p, trying to subscribe to topic: ~p but is allowed only to: ~p~n",[ClientId,Topic,Sub]),
               false
           end;
           _Else ->
-          io:format("ACL Unrecongnized event ~p~n",[_Else]),
+          ?LOG_LV(?LV_ERROR,("ACL Unrecongnized event ~p~n",[_Else]),
           false
       end;
     true->
@@ -628,3 +628,7 @@ update_all_clients([H|T])->
   update_all_clients(T);
 update_all_clients([])->
   ok.
+
+get_time() ->
+  {H, M, S} = time(),
+  [?DEC(H), $:, ?DEC(M), $:, ?DEC(S)].

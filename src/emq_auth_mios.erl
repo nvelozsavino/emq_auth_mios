@@ -10,6 +10,7 @@
 -author("nico").
 
 -include_lib("emqttd/include/emqttd.hrl").
+-include("emq_auth_mios.hrl").
 
 -export([load/1, unload/0]).
 
@@ -25,7 +26,7 @@ load(Env) ->
 
 
 on_client_disconnected(Reason, #mqtt_client{client_id = ClientId}, _Env) ->
-  io:format("on_client_disconnected: client ~s disconnected, reason: ~w~n", [ClientId, Reason]),
+  ?LOG_LV(?LV_WARNING,"on_client_disconnected: client ~s disconnected, reason: ~w~n", [ClientId, Reason]),
   emq_auth_mios_utils:delete_client(binary_to_list(ClientId)),
   ok.
 
