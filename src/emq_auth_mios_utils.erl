@@ -629,6 +629,3 @@ update_all_clients([H|T])->
 update_all_clients([])->
   ok.
 
-get_time() ->
-  {H, M, S} = time(),
-  [?DEC(H), $:, ?DEC(M), $:, ?DEC(S)].
