@@ -19,7 +19,7 @@
 -define(LV_DEBUG, 4).
 
 -define(DATETIME,
-  lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w:~3..0w",date_util:getDateTime()))).
+  lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w.~3..0w",date_util:getDateTime()))).
 
 
 -define(LOG_LV(Level,Format,Args),
