@@ -13,12 +13,13 @@
 -define(CLIENTS_DATABASE, mios_clients).
 -define(TOPICS_DATABASE, mios_topics).
 -define(DEC(X), $0 + X div 10, $0 + X rem 10).
+-define(FUNCTION, element(2, element(2, process_info(self(), current_function)))).
 -define(LV_ERROR, "01").
 -define(LV_WARNING, "02").
 -define(LV_STATUS, "03").
 -define(LV_DEBUG, "04").
 
 -define(LOG_LV(Level,Format,Args),
-  io:format("~p~t~p~t" ++  ?MODULE_STRING ++ ":"++ ?FUNCTION_NAME ++ "~t" ++ Format,[Level,emq_auth_mios_utils:get_time() | Args])).
+  io:format("~p~t~p~t" ++  ?MODULE_STRING ++ ":"++ ?FUNCTION ++ "~t" ++ Format,[Level,emq_auth_mios_utils:get_time() | Args])).
 -define(LOG_LV(Level,Format),
-  io:format("~p~t~p~t" ++  ?MODULE_STRING ++ ":"++ ?FUNCTION_NAME ++ "~t" ++ Format,[Level,emq_auth_mios_utils:get_time())).
+  io:format("~p~t~p~t" ++  ?MODULE_STRING ++ ":"++ ?FUNCTION ++ "~t" ++ Format,[Level,emq_auth_mios_utils:get_time())).
